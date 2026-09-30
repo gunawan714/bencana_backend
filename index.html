@@ -2,804 +2,772 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>BANDUL Admin Panel · Banten Peduli</title>
-<link rel="icon" href="https://fesbukbantennews.com/wp-content/uploads/2025/07/cropped-logo-fbn-2.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B3D91">
+<title>BANDUL Admin — Monitoring & Statistik</title>
+<link rel="icon" href="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
 <style>
-:root{--blue:#0B3D91;--blue-mid:#1557C0;--blue-light:#EEF4FF;--red:#D62828;--green:#2DC653;--amber:#F4A261;--ink:#0D1B2A;--ink-mid:#3D5166;--ink-soft:#7A94AB;--surface:#F4F7FB;--white:#fff;--border:rgba(11,61,145,.10);--shadow:0 8px 28px rgba(11,61,145,.12);}
+:root{
+  --blue:#0B3D91;--blue-mid:#1557C0;--blue-light:#EEF4FF;
+  --red:#D62828;--red-light:#FFF0F0;
+  --green:#2DC653;--green-dark:#1A9E3F;--green-light:#EDFBF2;
+  --amber:#F4A261;--amber-light:#FFF6EE;
+  --purple:#7C3AED;--purple-light:#F5F0FF;
+  --ink:#0D1B2A;--ink-mid:#3D5166;--ink-soft:#7A94AB;
+  --surface:#F4F7FB;--white:#FFF;
+  --border:rgba(11,61,145,0.10);
+  --shadow-sm:0 2px 8px rgba(11,61,145,.08);
+  --shadow-md:0 8px 28px rgba(11,61,145,.12);
+  --radius-sm:12px;--radius-md:20px;--radius-lg:28px;
+}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
-h1,h2,h3,h4,button,.poppins{font-family:'Poppins',sans-serif}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);line-height:1.6;min-height:100vh}
+h1,h2,h3,h4,h5,button{font-family:'Poppins',sans-serif}
 button{cursor:pointer;border:none;background:none;font-family:inherit}
 a{color:inherit;text-decoration:none}
-input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--blue-mid);border-radius:8px}
+::-webkit-scrollbar-track{background:var(--surface)}
 
-/* LOGIN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0B3D91,#07285F);padding:24px}
-.login-box{background:#fff;border-radius:24px;padding:36px 30px;max-width:420px;width:100%;box-shadow:0 30px 60px rgba(0,0,0,.3)}
-.login-box .logo{width:70px;height:70px;border-radius:50%;background:#fff;border:3px solid var(--blue-light);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.login-box .logo img{width:100%;height:100%;object-fit:cover}
-.login-box h1{font-size:1.3rem;font-weight:800;text-align:center;color:var(--blue);margin-bottom:4px}
-.login-box p{font-size:.82rem;color:var(--ink-soft);text-align:center;margin-bottom:24px}
-.login-field{margin-bottom:14px}
-.login-field label{display:block;font-size:.75rem;font-weight:600;color:var(--ink-mid);margin-bottom:6px}
-.login-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:.9rem;background:var(--surface);outline:none;transition:.2s}
-.login-field input:focus{border-color:var(--blue);background:#fff}
-.btn-login{width:100%;padding:14px;background:var(--blue);color:#fff;border-radius:50px;font-weight:700;font-size:.9rem;margin-top:8px;transition:.2s}
-.btn-login:hover{background:var(--blue-mid)}
-.btn-login:disabled{opacity:.5}
-.login-error{background:#FFF0F0;color:var(--red);padding:10px 14px;border-radius:10px;font-size:.78rem;margin-bottom:14px;display:none}
-.login-error.show{display:block}
-
-/* SHELL */
-.app-shell{display:none;min-height:100vh}
-.app-shell.on{display:flex}
-.sidebar{width:250px;background:linear-gradient(180deg,#0B3D91,#07285F);color:#fff;padding:22px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;transition:transform .3s}
-.sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
-.sidebar .brand img{width:38px;height:38px;border-radius:50%;background:#fff;padding:3px}
-.sidebar .brand h2{font-size:1rem;font-weight:800}
-.sidebar .brand span{font-size:.62rem;opacity:.7;letter-spacing:.08em;text-transform:uppercase}
-.nav-list{flex:1;padding:16px 12px;overflow-y:auto}
-.nav-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.75);margin-bottom:4px;transition:.2s;cursor:pointer}
-.nav-link i{width:20px;text-align:center;font-size:1rem}
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:250px;background:linear-gradient(180deg,#0B3D91,#07285F);color:#fff;padding:22px 14px;position:fixed;top:0;bottom:0;left:0;overflow-y:auto;z-index:100;transition:transform .3s}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:0 8px 20px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:16px}
+.sidebar-brand img{width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid rgba(255,255,255,.3);object-fit:cover}
+.sidebar-brand h1{font-size:1.05rem;font-weight:800;line-height:1.1}
+.sidebar-brand span{font-size:.65rem;opacity:.7;font-family:'Inter',sans-serif;font-weight:400}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px}
+.nav-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:rgba(255,255,255,.75);font-size:.85rem;font-weight:600;transition:.2s;position:relative}
+.nav-link i{font-size:1rem;width:20px;text-align:center}
 .nav-link:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-link.active{background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 3px 0 0 #F4A261}
-.nav-link .badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:50px;font-weight:700}
-.sidebar .logout{margin:12px;padding:12px;background:rgba(214,40,40,.15);color:#FFB4B4;border-radius:12px;font-size:.82rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
-.sidebar .logout:hover{background:rgba(214,40,40,.3)}
+.nav-link.active{background:rgba(255,255,255,.15);color:#fff}
+.nav-link .badge{margin-left:auto;background:var(--red);color:#fff;font-size:.65rem;padding:2px 8px;border-radius:50px;font-weight:700;font-family:'Inter',sans-serif}
+.sidebar-footer{margin-top:auto;padding:14px 8px 0;border-top:1px solid rgba(255,255,255,.15);position:absolute;bottom:14px;left:14px;right:14px;font-size:.68rem;color:rgba(255,255,255,.5);text-align:center}
 
-.main-area{flex:1;margin-left:250px;min-height:100vh;display:flex;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
-.topbar .menu-toggle{display:none;font-size:1.2rem;color:var(--blue)}
-.topbar h1{font-size:1.1rem;font-weight:700;flex:1}
-.topbar .admin-chip{display:flex;align-items:center;gap:8px;background:var(--blue-light);color:var(--blue);padding:6px 14px;border-radius:50px;font-size:.75rem;font-weight:600}
-.topbar .admin-chip i{font-size:.9rem}
-.content{padding:24px 26px 40px;flex:1}
-.page-section{display:none}
-.page-section.on{display:block;animation:fadeUp .3s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.main{flex:1;margin-left:250px;padding:22px 26px 40px;max-width:1400px}
+.topbar{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.topbar-title{flex:1;min-width:200px}
+.topbar-title h2{font-size:1.5rem;font-weight:800;color:var(--ink)}
+.topbar-title p{font-size:.82rem;color:var(--ink-soft)}
+.topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+.conn-status{display:flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);font-size:.72rem;font-weight:700;padding:6px 12px;border-radius:50px;border:1px solid rgba(45,198,83,.25)}
+.conn-status.offline{background:var(--red-light);color:var(--red);border-color:rgba(214,40,40,.25)}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.4s ease-in-out infinite}
+.conn-status.offline .conn-dot{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* STATS */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--blue);position:relative;overflow:hidden}
-.stat-card.red{border-color:var(--red)}
-.stat-card.green{border-color:var(--green)}
-.stat-card.amber{border-color:var(--amber)}
-.stat-card .label{font-size:.72rem;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.stat-card .value{font-size:1.9rem;font-weight:900;color:var(--ink);font-family:'Poppins',sans-serif}
-.stat-card .sub{font-size:.72rem;color:var(--ink-soft);margin-top:4px}
-.stat-card .icon{position:absolute;top:16px;right:16px;font-size:2rem;opacity:.1}
-.stat-card.red .icon{color:var(--red)}
-.stat-card.green .icon{color:var(--green)}
-.stat-card.amber .icon{color:var(--amber)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:50px;font-size:.78rem;font-weight:700;font-family:'Poppins',sans-serif;transition:.15s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(11,61,145,.25)}
+.btn-outline{background:#fff;border:1.5px solid var(--border);color:var(--ink-mid)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-amber{background:var(--amber);color:#fff}
+.btn-sm{padding:6px 12px;font-size:.7rem}
+.btn-icon{width:34px;height:34px;padding:0;justify-content:center;border-radius:50%}
 
-/* PANELS */
-.panel{background:#fff;border-radius:18px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden}
-.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.panel-head h3{font-size:.95rem;font-weight:700;flex:1}
-.panel-head .actions{display:flex;gap:8px;flex-wrap:wrap}
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+.stat-card{background:#fff;border-radius:var(--radius-md);padding:18px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.08;background:var(--blue)}
+.stat-card.sc-red::before{background:var(--red)}
+.stat-card.sc-green::before{background:var(--green)}
+.stat-card.sc-amber::before{background:var(--amber)}
+.stat-card.sc-purple::before{background:var(--purple)}
+.stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;margin-bottom:12px;background:var(--blue-light);color:var(--blue)}
+.stat-card.sc-red .stat-icon{background:var(--red-light);color:var(--red)}
+.stat-card.sc-green .stat-icon{background:var(--green-light);color:var(--green-dark)}
+.stat-card.sc-amber .stat-icon{background:var(--amber-light);color:#C45F00}
+.stat-card.sc-purple .stat-icon{background:var(--purple-light);color:var(--purple)}
+.stat-card h3{font-size:1.7rem;font-weight:900;color:var(--ink);line-height:1.1}
+.stat-card p{font-size:.72rem;color:var(--ink-soft);font-weight:600;margin-top:2px}
+.stat-trend{font-size:.68rem;font-weight:600;color:var(--green-dark);margin-top:6px}
+.stat-trend.down{color:var(--red)}
+
+.panel{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);margin-bottom:18px;overflow:hidden}
+.panel-head{padding:16px 20px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.panel-head h3{font-size:1rem;font-weight:700;flex:1}
+.panel-head p{font-size:.72rem;color:var(--ink-soft);width:100%;margin-top:-4px}
 .panel-body{padding:18px 20px}
 .chart-wrap{position:relative;height:280px}
 
 /* TABLE */
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.filters select,.filters input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;background:var(--surface);outline:none;min-width:130px}
-.filters select:focus,.filters input:focus{border-color:var(--blue);background:#fff}
-.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+.table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{background:var(--blue-light);color:var(--blue);font-weight:700;text-align:left;padding:11px 14px;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
-tbody td{padding:12px 14px;border-top:1px solid var(--border);vertical-align:middle}
-tbody tr:hover{background:var(--surface)}
-.status-pill{display:inline-block;padding:4px 10px;border-radius:50px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.status-pending{background:#FFF6EE;color:#C45F00}
-.status-in_progress{background:var(--blue-light);color:var(--blue)}
-.status-resolved{background:#EDFBF2;color:#1A9E3F}
-.status-rejected{background:#FFF0F0;color:var(--red)}
-.jenis-pill{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--ink-mid)}
-.btn-mini{padding:6px 10px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--blue-light);color:var(--blue);transition:.15s}
-.btn-mini:hover{background:#DCE6FA}
-.btn-mini.green{background:#EDFBF2;color:#1A9E3F}
-.btn-mini.red{background:#FFF0F0;color:var(--red)}
-.btn-mini.amber{background:#FFF6EE;color:#C45F00}
+thead th{text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);padding:10px 14px;border-bottom:1.5px solid var(--border);background:var(--surface);white-space:nowrap}
+tbody td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--ink-mid);vertical-align:middle}
+tbody tr:hover{background:var(--blue-light)}
+tbody tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:3px 10px;border-radius:50px;font-size:.68rem;font-weight:700;font-family:'Poppins',sans-serif;white-space:nowrap}
+.pill-red{background:var(--red-light);color:var(--red)}
+.pill-green{background:var(--green-light);color:var(--green-dark)}
+.pill-amber{background:var(--amber-light);color:#C45F00}
+.pill-blue{background:var(--blue-light);color:var(--blue)}
+.pill-purple{background:var(--purple-light);color:var(--purple)}
+.pill-gray{background:#EEF1F5;color:var(--ink-soft)}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filter-bar input,.filter-bar select{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);outline:none;transition:.2s;min-width:0}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--blue)}
+.filter-bar input{flex:1;min-width:180px}
 
-/* MAP */
-#adminMap{height:420px;border-radius:14px;overflow:hidden}
+.empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+.empty i{font-size:3rem;margin-bottom:14px;opacity:.4}
+.empty p{font-size:.85rem}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;backdrop-filter:blur(4px)}
-.modal-bg.on{display:flex}
-.modal-card{background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:26px}
-.modal-card h3{font-size:1.05rem;font-weight:700;margin-bottom:4px}
-.modal-card .close{position:absolute;top:20px;right:20px;font-size:1.1rem;color:var(--ink-soft)}
-.detail-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:.85rem}
+.overlay{position:fixed;inset:0;background:rgba(13,27,42,.55);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:18px}
+.overlay.open{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--radius-lg);width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:18px 22px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:12px}
+.modal-head h3{font-size:1.05rem;font-weight:700;flex:1}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--ink-mid)}
+.modal-body{padding:18px 22px}
+.detail-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.85rem}
 .detail-row:last-child{border-bottom:none}
-.detail-row .k{color:var(--ink-soft);font-weight:600;min-width:110px}
-.detail-row .v{color:var(--ink);flex:1;word-break:break-word}
-#modalMap{height:220px;border-radius:12px;margin:12px 0;overflow:hidden}
+.detail-row i{width:20px;color:var(--blue);text-align:center;font-size:.85rem;margin-top:3px;flex-shrink:0}
+.detail-row .dr-label{font-size:.7rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;display:block}
+.detail-row .dr-value{font-size:.88rem;color:var(--ink);word-break:break-word;font-weight:500}
+.modal-foot{padding:14px 22px 22px;display:flex;gap:8px;flex-wrap:wrap}
 
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:50px;font-size:.82rem;font-weight:500;z-index:9999;opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--green)}
-.toast.err{background:var(--red)}
+.toast{position:fixed;top:20px;right:20px;background:var(--ink);color:#fff;font-size:.8rem;font-weight:500;padding:12px 20px;border-radius:50px;z-index:9999;opacity:0;transform:translateY(-10px);transition:.3s;pointer-events:none;box-shadow:var(--shadow-md)}
+.toast.show{opacity:1;transform:translateY(0)}
 
-/* Empty / Loader */
-.empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:.85rem}
-.empty i{font-size:2.4rem;color:var(--border);margin-bottom:10px;display:block}
-.loader{display:inline-block;width:20px;height:20px;border:3px solid rgba(11,61,145,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.skeleton{background:linear-gradient(90deg,#eef1f6 25%,#f6f8fb 50%,#eef1f6 75%);background-size:200% 100%;animation:skel 1.4s infinite;border-radius:6px}
-@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.section{display:none}
+.section.active{display:block;animation:fadeIn .25s}
 
-/* Mobile */
-@media(max-width:860px){
+.hamburger{display:none;width:38px;height:38px;border-radius:10px;background:#fff;border:1.5px solid var(--border);color:var(--ink);align-items:center;justify-content:center}
+
+@media(max-width:820px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
-  .main-area{margin-left:0}
-  .topbar .menu-toggle{display:block}
-  .content{padding:16px}
-  .chart-wrap{height:230px}
-  #adminMap{height:320px}
+  .main{margin-left:0;padding:16px}
+  .hamburger{display:flex}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════ LOGIN ═══════════ -->
-<div class="login-wrap" id="loginWrap">
-  <div class="login-box">
-    <div class="logo"><img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="BANDUL"></div>
-    <h1>BANDUL Admin</h1>
-    <p>Banten Peduli · Panel Monitoring</p>
-    <div class="login-error" id="loginError"></div>
-    <div class="login-field">
-      <label>Email Admin</label>
-      <input type="email" id="loginEmail" placeholder="admin@bandul.id" autocomplete="username">
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn-login" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Masuk</button>
-  </div>
-</div>
-
-<!-- ═══════════ APP SHELL ═══════════ -->
-<div class="app-shell" id="appShell">
+<div class="app">
+  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="">
+    <div class="sidebar-brand">
+      <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="BANDUL">
       <div>
-        <h2>BANDUL</h2>
-        <span>Admin Panel</span>
+        <h1>BANDUL Admin</h1>
+        <span>Monitoring · Banten Peduli</span>
       </div>
     </div>
-    <nav class="nav-list">
-      <div class="nav-link active" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
-      <div class="nav-link" data-page="reports"><i class="fas fa-file-shield"></i> Laporan <span class="badge" id="badgeReports">0</span></div>
-      <div class="nav-link" data-page="users"><i class="fas fa-users"></i> Pengguna</div>
-      <div class="nav-link" data-page="map"><i class="fas fa-map-location-dot"></i> Peta Laporan</div>
-      <div class="nav-link" data-page="relawan"><i class="fas fa-people-group"></i> Relawan</div>
-      <div class="nav-link" data-page="settings"><i class="fas fa-gear"></i> Pengaturan</div>
+    <nav class="sidebar-nav">
+      <a class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a class="nav-link" data-section="reports"><i class="fas fa-file-medical"></i> Laporan Darurat <span class="badge" id="badgeReports">0</span></a>
+      <a class="nav-link" data-section="layanan"><i class="fas fa-hands-holding-heart"></i> Permintaan Layanan <span class="badge" id="badgeLayanan">0</span></a>
+      <a class="nav-link" data-section="partisipasi"><i class="fas fa-user-plus"></i> Partisipasi</a>
+      <a class="nav-link" data-section="users"><i class="fas fa-users"></i> Pengguna</a>
+      <a class="nav-link" data-section="config"><i class="fas fa-cog"></i> Pengaturan</a>
     </nav>
-    <button class="logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+    <div class="sidebar-footer">
+      <div>© 2026 Fesbukbantennews</div>
+      <div>v1.0 · Firebase</div>
+    </div>
   </aside>
 
-  <div class="main-area">
-    <header class="topbar">
-      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-      <h1 id="pageTitle">Dashboard</h1>
-      <div class="admin-chip"><i class="fas fa-circle-check"></i> <span id="adminEmail">admin</span></div>
-    </header>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div class="topbar-title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSub">Ringkasan aktivitas aplikasi BANDUL</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="conn-status" id="connStatus"><div class="conn-dot"></div><span id="connText">Live</span></div>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('reports')"><i class="fas fa-file-csv"></i> Export</button>
+        <button class="btn btn-blue btn-sm" onclick="location.reload()"><i class="fas fa-rotate"></i> Refresh</button>
+      </div>
+    </div>
 
-    <main class="content">
-      <!-- DASHBOARD -->
-      <section class="page-section on" id="page-dashboard">
-        <div class="stat-grid">
-          <div class="stat-card"><div class="label">Total Laporan</div><div class="value" id="statTotal">0</div><div class="sub">Sepanjang waktu</div><i class="fas fa-file-shield icon"></i></div>
-          <div class="stat-card red"><div class="label">Pending</div><div class="value" id="statPending">0</div><div class="sub">Perlu tindakan</div><i class="fas fa-bell icon"></i></div>
-          <div class="stat-card green"><div class="label">Selesai</div><div class="value" id="statResolved">0</div><div class="sub">Telah ditangani</div><i class="fas fa-circle-check icon"></i></div>
-          <div class="stat-card amber"><div class="label">Pengguna</div><div class="value" id="statUsers">0</div><div class="sub">Terverifikasi</div><i class="fas fa-users icon"></i></div>
+    <!-- DASHBOARD -->
+    <section class="section active" id="sec-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card sc-red">
+          <div class="stat-icon"><i class="fas fa-file-medical"></i></div>
+          <h3 id="stReports">0</h3>
+          <p>Total Laporan Darurat</p>
+          <div class="stat-trend" id="stReportsToday"><i class="fas fa-arrow-up"></i> 0 hari ini</div>
         </div>
+        <div class="stat-card sc-amber">
+          <div class="stat-icon"><i class="fas fa-hands-holding-heart"></i></div>
+          <h3 id="stLayanan">0</h3>
+          <p>Permintaan Layanan</p>
+          <div class="stat-trend" id="stLayananToday">0 hari ini</div>
+        </div>
+        <div class="stat-card sc-blue">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <h3 id="stUsers">0</h3>
+          <p>Pengguna Terverifikasi</p>
+          <div class="stat-trend" id="stUsersToday">0 baru hari ini</div>
+        </div>
+        <div class="stat-card sc-green">
+          <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+          <h3 id="stPartisipasi">0</h3>
+          <p>Partisipasi Warga</p>
+          <div class="stat-trend" id="stPartisipasiToday">0 hari ini</div>
+        </div>
+      </div>
 
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-chart-pie" style="color:var(--blue)"></i> Distribusi Jenis Bencana</h3>
-          </div>
-          <div class="panel-body">
-            <div class="chart-wrap"><canvas id="chartJenis"></canvas></div>
-          </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fas fa-chart-line" style="color:var(--blue)"></i> Tren Laporan 7 Hari Terakhir</h3>
         </div>
+        <div class="panel-body">
+          <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+        </div>
+      </div>
 
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-clock-rotate-left" style="color:var(--blue)"></i> Laporan Terbaru</h3>
-            <div class="actions"><button class="btn-mini" onclick="goPage('reports')">Lihat Semua <i class="fas fa-arrow-right"></i></button></div>
-          </div>
-          <div class="panel-body">
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Waktu</th><th>Jenis</th><th>Email</th><th>Status</th><th></th></tr></thead>
-                <tbody id="recentTable"><tr><td colspan="5" class="empty"><span class="loader"></span></td></tr></tbody>
-              </table>
-            </div>
-          </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fas fa-chart-pie" style="color:var(--red)"></i> Distribusi Jenis Kejadian</h3>
         </div>
-      </section>
+        <div class="panel-body">
+          <div class="chart-wrap"><canvas id="chartJenis"></canvas></div>
+        </div>
+      </div>
 
-      <!-- REPORTS -->
-      <section class="page-section" id="page-reports">
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-file-shield" style="color:var(--blue)"></i> Semua Laporan</h3>
-            <div class="actions">
-              <button class="btn-mini green" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
-            </div>
-          </div>
-          <div class="panel-body">
-            <div class="filters">
-              <select id="filterStatus">
-                <option value="">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">Diproses</option>
-                <option value="resolved">Selesai</option>
-                <option value="rejected">Ditolak</option>
-              </select>
-              <select id="filterJenis">
-                <option value="">Semua Jenis</option>
-                <option>Gempa Bumi</option><option>Banjir</option><option>Tsunami</option>
-                <option>Tanah Longsor</option><option>Kebakaran</option>
-                <option>Perlindungan Anak</option><option>Medis Darurat</option><option>Lainnya</option>
-              </select>
-              <input type="text" id="filterSearch" placeholder="Cari email / kronologi...">
-            </div>
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Waktu</th><th>Jenis</th><th>Email</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead>
-                <tbody id="reportsTable"><tr><td colspan="6" class="empty"><span class="loader"></span></td></tr></tbody>
-              </table>
-            </div>
-          </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fas fa-bolt" style="color:var(--amber)"></i> Laporan Terbaru</h3>
+          <button class="btn btn-outline btn-sm" onclick="switchSection('reports')">Lihat Semua →</button>
         </div>
-      </section>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Email</th><th>Jenis</th><th>Status</th><th>Lokasi</th></tr></thead>
+            <tbody id="recentReports"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-      <!-- USERS -->
-      <section class="page-section" id="page-users">
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-users" style="color:var(--blue)"></i> Pengguna Terverifikasi</h3>
-          </div>
-          <div class="panel-body">
-            <div class="filters">
-              <input type="text" id="userSearch" placeholder="Cari email..." style="flex:1">
-            </div>
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Email</th><th>Laporan</th><th>Terakhir Aktif</th><th>Terdaftar</th></tr></thead>
-                <tbody id="usersTable"><tr><td colspan="4" class="empty"><span class="loader"></span></td></tr></tbody>
-              </table>
-            </div>
-          </div>
+    <!-- REPORTS -->
+    <section class="section" id="sec-reports">
+      <div class="filter-bar">
+        <input type="search" id="fReportSearch" placeholder="🔍 Cari email, jenis, kronologi...">
+        <select id="fReportStatus">
+          <option value="">Semua Status</option>
+          <option value="baru">Baru</option>
+          <option value="diproses">Diproses</option>
+          <option value="selesai">Selesai</option>
+        </select>
+        <select id="fReportJenis">
+          <option value="">Semua Jenis</option>
+          <option>Gempa Bumi</option><option>Banjir</option><option>Tsunami</option>
+          <option>Tanah Longsor</option><option>Kebakaran</option>
+          <option>Perlindungan Anak</option><option>Medis Darurat</option><option>Lainnya</option>
+        </select>
+      </div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th><th>Email</th><th>Jenis</th><th>Lokasi</th>
+                <th>Rekaman</th><th>Status</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyReports"></tbody>
+          </table>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- MAP -->
-      <section class="page-section" id="page-map">
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-map-location-dot" style="color:var(--blue)"></i> Sebaran Laporan</h3>
-            <div class="actions"><button class="btn-mini" onclick="fitAllMarkers()"><i class="fas fa-crosshairs"></i> Reset View</button></div>
-          </div>
-          <div class="panel-body">
-            <div id="adminMap"></div>
-          </div>
+    <!-- LAYANAN -->
+    <section class="section" id="sec-layanan">
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Email</th><th>Jenis Layanan</th><th>Target WA</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tbodyLayanan"></tbody>
+          </table>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- RELAWAN -->
-      <section class="page-section" id="page-relawan">
-        <div class="panel">
-          <div class="panel-head">
-            <h3><i class="fas fa-people-group" style="color:var(--blue)"></i> Data Relawan</h3>
-            <div class="actions"><button class="btn-mini green" onclick="seedRelawan()"><i class="fas fa-seedling"></i> Seed Data Awal</button></div>
-          </div>
-          <div class="panel-body">
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Wilayah</th><th>Nama</th><th>Peran</th><th>WA</th><th>Aktif</th></tr></thead>
-                <tbody id="relawanTable"><tr><td colspan="5" class="empty"><span class="loader"></span></td></tr></tbody>
-              </table>
-            </div>
-          </div>
+    <!-- PARTISIPASI -->
+    <section class="section" id="sec-partisipasi">
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Email</th><th>Bentuk Partisipasi</th><th>Aksi</th></tr></thead>
+            <tbody id="tbodyPartisipasi"></tbody>
+          </table>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- SETTINGS -->
-      <section class="page-section" id="page-settings">
-        <div class="panel">
-          <div class="panel-head"><h3><i class="fas fa-gear" style="color:var(--blue)"></i> Informasi Sistem</h3></div>
-          <div class="panel-body">
-            <div class="detail-row"><span class="k">Project ID</span><span class="v" id="cfgProject">-</span></div>
-            <div class="detail-row"><span class="k">Admin Aktif</span><span class="v" id="cfgAdmin">-</span></div>
-            <div class="detail-row"><span class="k">Versi Panel</span><span class="v">1.0.0</span></div>
-            <div class="detail-row"><span class="k">Database</span><span class="v">Firestore (realtime)</span></div>
-          </div>
+    <!-- USERS -->
+    <section class="section" id="sec-users">
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Email</th><th>Verifikasi</th><th>Total Laporan</th><th>Pertama Dilihat</th><th>Terakhir Aktif</th></tr></thead>
+            <tbody id="tbodyUsers"></tbody>
+          </table>
         </div>
-        <div class="panel">
-          <div class="panel-head"><h3><i class="fas fa-database" style="color:var(--blue)"></i> Maintenance</h3></div>
-          <div class="panel-body">
-            <p style="font-size:.85rem;color:var(--ink-mid);margin-bottom:14px">Operasi berikut mempengaruhi seluruh data. Hati-hati!</p>
-            <button class="btn-mini red" style="padding:10px 16px;font-size:.82rem" onclick="wipeOldReports()"><i class="fas fa-trash"></i> Hapus Laporan Selesai > 30 Hari</button>
-          </div>
+      </div>
+    </section>
+
+    <!-- CONFIG -->
+    <section class="section" id="sec-config">
+      <div class="panel">
+        <div class="panel-head"><h3><i class="fas fa-cog"></i> Pengaturan Aplikasi</h3></div>
+        <div class="panel-body">
+          <div class="detail-row"><i class="fas fa-database"></i><div><span class="dr-label">Project ID</span><span class="dr-value" id="cfgProjectId">—</span></div></div>
+          <div class="detail-row"><i class="fas fa-signal"></i><div><span class="dr-label">Status Koneksi</span><span class="dr-value" id="cfgConn">—</span></div></div>
+          <div class="detail-row"><i class="fas fa-file-shield"></i><div><span class="dr-label">Koleksi Firestore</span><span class="dr-value">reports · users · layanan_requests · partisipasi</span></div></div>
         </div>
-      </section>
-    </main>
-  </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3><i class="fas fa-circle-info"></i> Petunjuk Integrasi</h3></div>
+        <div class="panel-body" style="font-size:.85rem;color:var(--ink-mid);line-height:1.7">
+          <p>1. Buat project gratis di <a href="https://console.firebase.google.com" target="_blank" style="color:var(--blue);font-weight:700">console.firebase.google.com</a></p>
+          <p>2. Aktifkan <strong>Cloud Firestore</strong> (mode test / production)</p>
+          <p>3. Salin konfigurasi Firebase ke dalam <code>firebaseConfig</code> di file ini dan di <code>index.html</code> BANDUL</p>
+          <p>4. Gunakan Security Rules yang sesuai — lihat bagian komentar di dalam script</p>
+          <p>5. Pastikan domain GitHub Pages sudah masuk di <em>Authorized Domains</em></p>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<!-- MODAL DETAIL -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal-card" style="position:relative" id="modalCard">
-    <button class="close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-    <h3 id="modalTitle">Detail Laporan</h3>
-    <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:14px" id="modalSub">—</p>
-    <div id="modalContent"></div>
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3 id="modalTitle">Detail Laporan</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   ⚙️ KONFIGURASI — GANTI DENGAN MILIK ANDA
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   1. FIREBASE CONFIG — GANTI DENGAN PUNYA ANDA
+   (Ambil dari Firebase Console → Project Settings → Web App)
+═══════════════════════════════════════════════════════ */
 const firebaseConfig = {
-  apiKey: "ISI_API_KEY",
-  authDomain: "bandul-banten.firebaseapp.com",
-  projectId: "bandul-banten",
-  storageBucket: "bandul-banten.appspot.com",
-  messagingSenderId: "ISI_SENDER_ID",
-  appId: "ISI_APP_ID"
+  apiKey:            "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  authDomain:        "bandul-app.firebaseapp.com",
+  projectId:         "bandul-app",
+  storageBucket:     "bandul-app.appspot.com",
+  messagingSenderId: "1234567890",
+  appId:             "1:1234567890:web:abcdef1234567890"
 };
 
-/* ═══ INIT ═══ */
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db   = firebase.firestore();
-const FV   = firebase.firestore.FieldValue;
+const db = firebase.firestore();
+document.getElementById('cfgProjectId').textContent = firebaseConfig.projectId;
 
-document.getElementById('cfgProject').textContent = firebaseConfig.projectId;
+/* ═══════════════════════════════════════════════════════
+   2. STATE
+═══════════════════════════════════════════════════════ */
+const state = {
+  reports: [],
+  layanan: [],
+  partisipasi: [],
+  users: [],
+  charts: { trend:null, jenis:null }
+};
 
-/* ═══ STATE ═══ */
-let allReports = [];
-let allUsers   = [];
-let allRelawan = [];
-let chartJenis = null;
-let map, markers = [];
-let mapBounds = null;
+/* ═══════════════════════════════════════════════════════
+   3. NAVIGATION
+═══════════════════════════════════════════════════════ */
+const SECTION_META = {
+  dashboard:  { title:'Dashboard',            sub:'Ringkasan aktivitas aplikasi BANDUL' },
+  reports:    { title:'Laporan Darurat',       sub:'Semua laporan bencana yang masuk' },
+  layanan:    { title:'Permintaan Layanan',    sub:'Permintaan bantuan medis & sosial' },
+  partisipasi:{ title:'Partisipasi Warga',     sub:'Relawan, sumbangan, kendaraan' },
+  users:      { title:'Pengguna Terverifikasi',sub:'Email yang telah diverifikasi OTP' },
+  config:     { title:'Pengaturan',            sub:'Konfigurasi & info backend' }
+};
 
-/* ═══ AUTH ═══ */
-const $ = (id) => document.getElementById(id);
-function toast(msg, type='') {
-  const t = $('toast');
-  t.textContent = msg;
-  t.className = 'toast on ' + type;
-  setTimeout(() => t.className = 'toast ' + type, 3000);
+function switchSection(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelector(`.nav-link[data-section="${id}"]`).classList.add('active');
+  document.getElementById('pageTitle').textContent = SECTION_META[id].title;
+  document.getElementById('pageSub').textContent = SECTION_META[id].sub;
+  document.getElementById('sidebar').classList.remove('open');
 }
-function showLoginErr(msg){ $('loginError').textContent = msg; $('loginError').classList.add('show'); }
-function hideLoginErr(){ $('loginError').classList.remove('show'); }
+document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => switchSection(l.dataset.section)));
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 
-$('btnLogin').addEventListener('click', async () => {
-  const email = $('loginEmail').value.trim();
-  const pass  = $('loginPass').value;
-  if (!email || !pass) return showLoginErr('Email & password wajib diisi.');
-  hideLoginErr();
-  const btn = $('btnLogin');
-  btn.disabled = true; btn.innerHTML = '<span class="loader" style="border-top-color:#fff"></span> Memuat...';
-  try {
-    await auth.signInWithEmailAndPassword(email, pass);
-  } catch (e) {
-    showLoginErr('Login gagal: ' + (e.message || 'Periksa kredensial.'));
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
-  }
-});
-
-$('btnLogout').addEventListener('click', () => auth.signOut());
-
-auth.onAuthStateChanged((user) => {
-  const btn = $('btnLogin');
-  if (user) {
-    $('loginWrap').style.display = 'none';
-    $('appShell').classList.add('on');
-    $('adminEmail').textContent = user.email;
-    $('cfgAdmin').textContent = user.email;
-    startRealtimeListeners();
-  } else {
-    $('loginWrap').style.display = 'flex';
-    $('appShell').classList.remove('on');
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
-    stopListeners();
-  }
-});
-
-/* ═══ REALTIME LISTENERS ═══ */
-let unsubReports, unsubUsers, unsubRelawan;
-function startRealtimeListeners() {
-  unsubReports = db.collection('reports').orderBy('createdAt', 'desc').limit(500)
-    .onSnapshot(snap => {
-      allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderDashboard();
-      renderReportsTable();
-      renderMap();
-      const pending = allReports.filter(r => r.status === 'pending').length;
-      $('badgeReports').textContent = pending;
-      $('badgeReports').style.display = pending ? 'inline-block' : 'none';
-    }, err => console.error('reports', err));
-
-  unsubUsers = db.collection('users').orderBy('lastActive', 'desc').limit(500)
-    .onSnapshot(snap => {
-      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderUsersTable();
-      $('statUsers').textContent = allUsers.length;
-    }, err => console.error('users', err));
-
-  unsubRelawan = db.collection('relawan').orderBy('wilayah')
-    .onSnapshot(snap => {
-      allRelawan = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderRelawanTable();
-    }, err => console.error('relawan', err));
+/* ═══════════════════════════════════════════════════════
+   4. UTIL
+═══════════════════════════════════════════════════════ */
+function showToast(msg, dur=2500){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), dur);
 }
-function stopListeners(){
-  unsubReports && unsubReports(); unsubUsers && unsubUsers(); unsubRelawan && unsubRelawan();
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtTime(ts){
+  if(!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function isToday(ts){
+  if(!ts) return false;
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const n = new Date();
+  return d.getDate()===n.getDate() && d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear();
+}
+function pillForStatus(s){
+  const map = { baru:'pill-red', diproses:'pill-amber', selesai:'pill-green' };
+  return `<span class="pill ${map[s]||'pill-gray'}">${esc(s||'baru')}</span>`;
 }
 
-/* ═══ NAVIGATION ═══ */
-const pageTitles = {dashboard:'Dashboard', reports:'Laporan', users:'Pengguna', map:'Peta Laporan', relawan:'Relawan', settings:'Pengaturan'};
-function goPage(p) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('on'));
-  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-  $('page-'+p).classList.add('on');
-  document.querySelector(`.nav-link[data-page="${p}"]`)?.classList.add('active');
-  $('pageTitle').textContent = pageTitles[p] || p;
-  $('sidebar').classList.remove('open');
-  if (p === 'map') setTimeout(() => { map && map.invalidateSize(); }, 150);
-}
-document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => goPage(n.dataset.page)));
-$('menuToggle').addEventListener('click', () => $('sidebar').classList.toggle('open'));
-
-/* ═══ DASHBOARD ═══ */
-function renderDashboard() {
-  $('statTotal').textContent    = allReports.length;
-  $('statPending').textContent  = allReports.filter(r => r.status === 'pending').length;
-  $('statResolved').textContent = allReports.filter(r => r.status === 'resolved').length;
-
-  // Chart
-  const counts = {};
-  allReports.forEach(r => { const k = r.jenis || 'Lainnya'; counts[k] = (counts[k] || 0) + 1; });
-  const labels = Object.keys(counts);
-  const data   = labels.map(l => counts[l]);
-  const palette = ['#0B3D91','#1557C0','#D62828','#F4A261','#2DC653','#7C3AED','#0B7DAA','#7A94AB'];
-
-  if (chartJenis) chartJenis.destroy();
-  const ctx = $('chartJenis');
-  if (!ctx) return;
-  chartJenis = new Chart(ctx, {
-    type: 'doughnut',
-    data: { labels: labels.length ? labels : ['Belum ada data'], datasets: [{ data: data.length ? data : [1], backgroundColor: palette, borderWidth: 0 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'right', labels: { font: { family: 'Inter', size: 12 }, padding: 14 } } }
-    }
-  });
-
-  // Recent table
-  const recent = allReports.slice(0, 6);
-  const tbody = $('recentTable');
-  if (!recent.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty"><i class="fas fa-inbox"></i>Belum ada laporan</td></tr>';
-    return;
-  }
-  tbody.innerHTML = recent.map(r => `
-    <tr>
-      <td>${fmtDate(r.createdAt)}</td>
-      <td><span class="jenis-pill"><i class="${jenisIcon(r.jenis)}" style="color:${jenisColor(r.jenis)}"></i>${r.jenis || '-'}</span></td>
-      <td style="font-size:.78rem">${esc(r.userEmail || r.userId || '-')}</td>
-      <td><span class="status-pill status-${r.status || 'pending'}">${statusLabel(r.status)}</span></td>
-      <td><button class="btn-mini" onclick="openReport('${r.id}')">Detail</button></td>
-    </tr>`).join('');
-}
-
-/* ═══ REPORTS TABLE ═══ */
-function renderReportsTable() {
-  const status = $('filterStatus').value;
-  const jenis  = $('filterJenis').value;
-  const q      = ($('filterSearch').value || '').toLowerCase();
-
-  let rows = allReports;
-  if (status) rows = rows.filter(r => (r.status || 'pending') === status);
-  if (jenis)  rows = rows.filter(r => r.jenis === jenis);
-  if (q)      rows = rows.filter(r =>
-    (r.userEmail || '').toLowerCase().includes(q) ||
-    (r.kronologi || '').toLowerCase().includes(q) ||
-    (r.userId || '').toLowerCase().includes(q)
+/* ═══════════════════════════════════════════════════════
+   5. FIRESTORE LISTENERS (REALTIME)
+═══════════════════════════════════════════════════════ */
+function listenCollection(name, key, cb){
+  db.collection(name).orderBy('createdAt','desc').limit(500).onSnapshot(
+    snap => {
+      const arr = [];
+      snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
+      state[key] = arr;
+      cb();
+      setConn(true);
+    },
+    err => { console.warn(name, err); setConn(false); }
   );
+}
+function setConn(ok){
+  const el = document.getElementById('connStatus');
+  el.classList.toggle('offline', !ok);
+  document.getElementById('connText').textContent = ok ? 'Live' : 'Offline';
+  document.getElementById('cfgConn').textContent = ok ? '✅ Terhubung' : '❌ Tidak terhubung';
+}
 
-  const tbody = $('reportsTable');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty"><i class="fas fa-inbox"></i>Tidak ada laporan yang cocok</td></tr>';
-    return;
+listenCollection('reports',           'reports',     renderAll);
+listenCollection('layanan_requests',  'layanan',     renderAll);
+listenCollection('partisipasi',       'partisipasi', renderAll);
+listenCollection('users',             'users',       renderAll);
+
+/* ═══════════════════════════════════════════════════════
+   6. RENDER ALL
+═══════════════════════════════════════════════════════ */
+function renderAll(){
+  renderStats();
+  renderCharts();
+  renderRecentReports();
+  renderReportsTable();
+  renderLayananTable();
+  renderPartisipasiTable();
+  renderUsersTable();
+  renderBadges();
+}
+
+function renderBadges(){
+  const newReports = state.reports.filter(r => !r.status || r.status === 'baru').length;
+  document.getElementById('badgeReports').textContent = newReports;
+  document.getElementById('badgeReports').style.display = newReports ? 'inline-block' : 'none';
+  document.getElementById('badgeLayanan').textContent = state.layanan.length;
+}
+
+/* ── STATS ── */
+function renderStats(){
+  document.getElementById('stReports').textContent = state.reports.length;
+  const todayReports = state.reports.filter(r => isToday(r.createdAt)).length;
+  document.getElementById('stReportsToday').innerHTML = `<i class="fas fa-arrow-up"></i> ${todayReports} hari ini`;
+
+  document.getElementById('stLayanan').textContent = state.layanan.length;
+  const todayLayanan = state.layanan.filter(l => isToday(l.createdAt)).length;
+  document.getElementById('stLayananToday').textContent = `${todayLayanan} hari ini`;
+
+  document.getElementById('stUsers').textContent = state.users.length;
+  const todayUsers = state.users.filter(u => isToday(u.firstSeen)).length;
+  document.getElementById('stUsersToday').textContent = `${todayUsers} baru hari ini`;
+
+  document.getElementById('stPartisipasi').textContent = state.partisipasi.length;
+  const todayP = state.partisipasi.filter(p => isToday(p.createdAt)).length;
+  document.getElementById('stPartisipasiToday').textContent = `${todayP} hari ini`;
+}
+
+/* ── CHARTS ── */
+function renderCharts(){
+  // Trend 7 hari
+  const days = [];
+  const labels = [];
+  const counts = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
+    const next = new Date(d); next.setDate(next.getDate()+1);
+    const label = d.toLocaleDateString('id-ID', { day:'numeric', month:'short' });
+    labels.push(label);
+    const c = state.reports.filter(r => {
+      const t = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+      return t >= d && t < next;
+    }).length;
+    counts.push(c);
   }
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td style="font-size:.78rem">${fmtDate(r.createdAt)}</td>
-      <td><span class="jenis-pill"><i class="${jenisIcon(r.jenis)}" style="color:${jenisColor(r.jenis)}"></i>${r.jenis || '-'}</span></td>
-      <td style="font-size:.78rem">${esc(r.userEmail || r.userId || '-')}</td>
-      <td style="font-size:.72rem;color:var(--ink-soft)">${r.lat && r.lng ? `<a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue)"><i class="fas fa-map-pin"></i> Lihat</a>` : '-'}</td>
-      <td><span class="status-pill status-${r.status || 'pending'}">${statusLabel(r.status)}</span></td>
-      <td style="white-space:nowrap">
-        <button class="btn-mini" onclick="openReport('${r.id}')">Detail</button>
-      </td>
-    </tr>`).join('');
-}
-['filterStatus','filterJenis','filterSearch'].forEach(id => $(id).addEventListener('input', renderReportsTable));
-
-/* ═══ USERS TABLE ═══ */
-function renderUsersTable() {
-  const q = ($('userSearch').value || '').toLowerCase();
-  let rows = allUsers;
-  if (q) rows = rows.filter(u => (u.email || u.id || '').toLowerCase().includes(q));
-
-  const tbody = $('usersTable');
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty"><i class="fas fa-users"></i>Belum ada pengguna</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(u => {
-    const email = u.email || u.id;
-    const count = allReports.filter(r => (r.userEmail === email || r.userId === email)).length;
-    return `
-      <tr>
-        <td style="font-weight:600">${esc(email)}</td>
-        <td>${count}</td>
-        <td style="font-size:.78rem;color:var(--ink-soft)">${fmtDate(u.lastActive)}</td>
-        <td style="font-size:.78rem;color:var(--ink-soft)">${fmtDate(u.createdAt)}</td>
-      </tr>`;
-  }).join('');
-}
-$('userSearch').addEventListener('input', renderUsersTable);
-
-/* ═══ RELAWAN TABLE ═══ */
-function renderRelawanTable() {
-  const tbody = $('relawanTable');
-  if (!allRelawan.length) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty"><i class="fas fa-people-group"></i>Belum ada data relawan. Klik "Seed Data Awal".</td></tr>';
-    return;
-  }
-  tbody.innerHTML = allRelawan.map(r => `
-    <tr>
-      <td style="font-weight:600">${esc(r.wilayah || '-')}</td>
-      <td>${esc(r.nama || '-')}</td>
-      <td style="font-size:.78rem">${esc(r.role || '-')}</td>
-      <td style="font-size:.78rem"><a href="https://wa.me/${r.wa}" target="_blank" style="color:var(--green)"><i class="fab fa-whatsapp"></i> ${esc(r.wa || '-')}</a></td>
-      <td>${r.active === false ? '<span class="status-pill status-rejected">Nonaktif</span>' : '<span class="status-pill status-resolved">Aktif</span>'}</td>
-    </tr>`).join('');
-}
-
-async function seedRelawan() {
-  if (!confirm('Tambahkan 8 data relawan default?')) return;
-  const seed = [
-    {wilayah:'Kota Serang', nama:'Koordinator FBn Serang', role:'Posko Utama', wa:'6285712345678', active:true},
-    {wilayah:'Kab. Serang', nama:'Koordinator Kab. Serang', role:'Tanggap Bencana', wa:'6285712345679', active:true},
-    {wilayah:'Kota Cilegon', nama:'Relawan FBn Cilegon', role:'SAR & Evakuasi', wa:'6285712345680', active:true},
-    {wilayah:'Kab. Pandeglang', nama:'FBn Pandeglang Siaga', role:'Medis Lapangan', wa:'6285712345681', active:true},
-    {wilayah:'Kab. Lebak', nama:'FBn Lebak Tanggap', role:'Logistik & P3K', wa:'6285712345682', active:true},
-    {wilayah:'Kab. Tangerang', nama:'FBn Kab. Tangerang', role:'Koordinasi Cepat', wa:'6285712345683', active:true},
-    {wilayah:'Kota Tangerang', nama:'FBn Kota Tangerang', role:'Evakuasi & SAR', wa:'6285712345684', active:true},
-    {wilayah:'Tangsel', nama:'FBn Tangsel Peduli', role:'Bantuan Sosial', wa:'6285712345685', active:true}
-  ];
-  try {
-    const batch = db.batch();
-    seed.forEach(r => batch.set(db.collection('relawan').doc(), r));
-    await batch.commit();
-    toast('✅ 8 relawan ditambahkan', 'ok');
-  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
-}
-
-/* ═══ MAP ═══ */
-function initMap() {
-  if (map) return;
-  map = L.map('adminMap').setView([-6.3, 106.2], 9);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '© OpenStreetMap'
-  }).addTo(map);
-  mapBounds = L.latLngBounds();
-}
-function renderMap() {
-  if (!map) initMap();
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-  mapBounds = L.latLngBounds();
-  allReports.forEach(r => {
-    if (!r.lat || !r.lng) return;
-    const color = statusColor(r.status);
-    const m = L.circleMarker([parseFloat(r.lat), parseFloat(r.lng)], {
-      radius: 8, color: '#fff', weight: 2, fillColor: color, fillOpacity: .9
-    }).addTo(map).bindPopup(`
-      <div style="font-family:Inter,sans-serif;font-size:.8rem">
-        <strong style="color:${color}">${r.jenis || '-'}</strong><br>
-        <span style="color:#666">${esc(r.userEmail || '')}</span><br>
-        <span style="color:#999;font-size:.72rem">${fmtDate(r.createdAt)}</span><br>
-        <a href="#" onclick="openReport('${r.id}');return false" style="color:#0B3D91;font-weight:600">Lihat Detail →</a>
-      </div>`);
-    markers.push(m);
-    mapBounds.extend([parseFloat(r.lat), parseFloat(r.lng)]);
+  const ctx1 = document.getElementById('chartTrend');
+  if(state.charts.trend) state.charts.trend.destroy();
+  state.charts.trend = new Chart(ctx1, {
+    type:'line',
+    data:{ labels, datasets:[{
+      label:'Laporan', data: counts,
+      borderColor:'#0B3D91', backgroundColor:'rgba(11,61,145,.12)',
+      fill:true, tension:.4, borderWidth:3, pointRadius:5, pointBackgroundColor:'#0B3D91'
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+      scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 } } } }
   });
-  if (markers.length && map) {
-    try { map.fitBounds(mapBounds.pad(.2)); } catch(e){}
-  }
-}
-function fitAllMarkers() {
-  if (map && markers.length) map.fitBounds(mapBounds.pad(.2));
-}
-function statusColor(s) {
-  return {pending:'#F4A261', in_progress:'#1557C0', resolved:'#2DC653', rejected:'#D62828'}[s || 'pending'];
+
+  // Jenis
+  const jenisMap = {};
+  state.reports.forEach(r => { const j = r.jenis||'Lainnya'; jenisMap[j]=(jenisMap[j]||0)+1; });
+  const jLabels = Object.keys(jenisMap);
+  const jData   = Object.values(jenisMap);
+  const palette = ['#D62828','#1557C0','#00838F','#7B5E2A','#F4A261','#7C3AED','#2DC653','#7A94AB'];
+  const ctx2 = document.getElementById('chartJenis');
+  if(state.charts.jenis) state.charts.jenis.destroy();
+  state.charts.jenis = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:jLabels.length?jLabels:['Belum ada'],
+      datasets:[{ data:jData.length?jData:[1], backgroundColor:palette, borderWidth:2, borderColor:'#fff' }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{ position:'right', labels:{ font:{ size:11, family:'Inter' }, padding:12 } } } }
+  });
 }
 
-/* ═══ MODAL DETAIL ═══ */
-let modalMap = null;
-function openReport(id) {
-  const r = allReports.find(x => x.id === id);
-  if (!r) return;
-  $('modalTitle').textContent = r.jenis || 'Detail Laporan';
-  $('modalSub').textContent = `ID: ${id} · ${fmtDate(r.createdAt)}`;
-
-  const emailVal = esc(r.userEmail || r.userId || '-');
-  $('modalContent').innerHTML = `
-    <div class="detail-row"><span class="k">Status</span><span class="v">
-      <select id="modalStatus" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:.82rem">
-        <option value="pending" ${r.status==='pending'||!r.status?'selected':''}>Pending</option>
-        <option value="in_progress" ${r.status==='in_progress'?'selected':''}>Diproses</option>
-        <option value="resolved" ${r.status==='resolved'?'selected':''}>Selesai</option>
-        <option value="rejected" ${r.status==='rejected'?'selected':''}>Ditolak</option>
-      </select>
-      <button class="btn-mini green" style="margin-left:8px" onclick="updateStatus('${id}')">Simpan</button>
-    </span></div>
-    <div class="detail-row"><span class="k">Pelapor</span><span class="v">${emailVal}</span></div>
-    <div class="detail-row"><span class="k">Tanggal</span><span class="v">${esc(r.tanggal || '-')} · ${esc(r.jam || '-')}</span></div>
-    <div class="detail-row"><span class="k">Koordinat</span><span class="v">
-      ${r.lat && r.lng ? `<a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue)">${r.lat}, ${r.lng}</a>` : '-'}
-    </span></div>
-    <div class="detail-row"><span class="k">Kronologi</span><span class="v">${esc(r.kronologi || '(tidak diisi)')}</span></div>
-    <div class="detail-row"><span class="k">Rekaman</span><span class="v">${esc(r.audioNote || 'Tidak ada')}</span></div>
-    <div class="detail-row"><span class="k">Catatan Admin</span><span class="v">
-      <textarea id="modalNotes" placeholder="Tambahkan catatan..." style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:.82rem;resize:vertical;min-height:60px">${esc(r.notes || '')}</textarea>
-    </span></div>
-    <div id="modalMap"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <a class="btn-mini green" style="padding:10px 14px;font-size:.8rem" href="https://wa.me/${(r.userEmail||'').replace(/\D/g,'')}" target="_blank"><i class="fab fa-whatsapp"></i> Hubungi Pelapor</a>
-      <button class="btn-mini amber" style="padding:10px 14px;font-size:.8rem" onclick="saveNotes('${id}')"><i class="fas fa-save"></i> Simpan Catatan</button>
-      <button class="btn-mini red" style="padding:10px 14px;font-size:.8rem" onclick="deleteReport('${id}')"><i class="fas fa-trash"></i> Hapus</button>
-    </div>`;
-  $('modalBg').classList.add('on');
-
-  setTimeout(() => {
-    if (modalMap) { modalMap.remove(); modalMap = null; }
-    if (r.lat && r.lng) {
-      modalMap = L.map('modalMap').setView([parseFloat(r.lat), parseFloat(r.lng)], 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(modalMap);
-      L.marker([parseFloat(r.lat), parseFloat(r.lng)]).addTo(modalMap);
-    }
-  }, 100);
-}
-function closeModal() {
-  $('modalBg').classList.remove('on');
-  if (modalMap) { modalMap.remove(); modalMap = null; }
+/* ── RECENT REPORTS (dashboard) ── */
+function renderRecentReports(){
+  const tb = document.getElementById('recentReports');
+  const list = state.reports.slice(0,8);
+  if(!list.length){ tb.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada laporan masuk</p></div></td></tr>`; return; }
+  tb.innerHTML = list.map(r => `
+    <tr style="cursor:pointer" onclick="openReport('${r.id}')">
+      <td>${fmtTime(r.createdAt)}</td>
+      <td><strong>${esc(r.email||'—')}</strong></td>
+      <td><span class="pill pill-blue">${esc(r.jenis||'—')}</span></td>
+      <td>${pillForStatus(r.status)}</td>
+      <td style="font-size:.72rem;color:var(--ink-soft)">${r.lat?`${r.lat}, ${r.lng}`:'—'}</td>
+    </tr>
+  `).join('');
 }
 
-async function updateStatus(id) {
-  const v = $('modalStatus').value;
+/* ── REPORTS TABLE ── */
+function renderReportsTable(){
+  const q       = document.getElementById('fReportSearch').value.toLowerCase();
+  const fStatus = document.getElementById('fReportStatus').value;
+  const fJenis  = document.getElementById('fReportJenis').value;
+  const tb = document.getElementById('tbodyReports');
+
+  let list = state.reports;
+  if(q) list = list.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+  if(fStatus) list = list.filter(r => (r.status||'baru') === fStatus);
+  if(fJenis)  list = list.filter(r => r.jenis === fJenis);
+
+  if(!list.length){ tb.innerHTML = `<tr><td colspan="7"><div class="empty"><i class="fas fa-inbox"></i><p>Tidak ada laporan</p></div></td></tr>`; return; }
+
+  tb.innerHTML = list.map(r => `
+    <tr>
+      <td style="white-space:nowrap">${fmtTime(r.createdAt)}</td>
+      <td>${esc(r.email||'—')}</td>
+      <td><span class="pill pill-blue">${esc(r.jenis||'—')}</span></td>
+      <td style="font-size:.72rem">${r.lat?`<a target="_blank" href="https://www.google.com/maps?q=${r.lat},${r.lng}" style="color:var(--blue)">📍 Lihat</a>`:'—'}</td>
+      <td>${r.audioNote && r.audioNote!=='Tidak ada rekaman'?'🎙️ Ya':'—'}</td>
+      <td>${pillForStatus(r.status)}</td>
+      <td>
+        <button class="btn btn-blue btn-sm" onclick="openReport('${r.id}')"><i class="fas fa-eye"></i></button>
+      </td>
+    </tr>
+  `).join('');
+}
+['fReportSearch','fReportStatus','fReportJenis'].forEach(id => {
+  const el = document.getElementById(id); if(el) el.addEventListener('input', renderReportsTable);
+});
+
+/* ── LAYANAN TABLE ── */
+function renderLayananTable(){
+  const tb = document.getElementById('tbodyLayanan');
+  if(!state.layanan.length){ tb.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada permintaan</p></div></td></tr>`; return; }
+  tb.innerHTML = state.layanan.map(l => `
+    <tr>
+      <td>${fmtTime(l.createdAt)}</td>
+      <td>${esc(l.email||'—')}</td>
+      <td><span class="pill pill-amber">${esc(l.jenis||'—')}</span></td>
+      <td><a target="_blank" href="https://wa.me/${esc(l.waTarget||'')}" style="color:var(--green-dark)"><i class="fab fa-whatsapp"></i> ${esc(l.waTarget||'—')}</a></td>
+      <td>${pillForStatus(l.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openLayanan('${l.id}')"><i class="fas fa-eye"></i></button></td>
+    </tr>
+  `).join('');
+}
+
+/* ── PARTISIPASI TABLE ── */
+function renderPartisipasiTable(){
+  const tb = document.getElementById('tbodyPartisipasi');
+  if(!state.partisipasi.length){ tb.innerHTML = `<tr><td colspan="4"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada partisipasi</p></div></td></tr>`; return; }
+  tb.innerHTML = state.partisipasi.map(p => `
+    <tr>
+      <td>${fmtTime(p.createdAt)}</td>
+      <td>${esc(p.email||'—')}</td>
+      <td><span class="pill pill-green">${esc(p.jenis||'—')}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="openPartisipasi('${p.id}')"><i class="fas fa-eye"></i></button></td>
+    </tr>
+  `).join('');
+}
+
+/* ── USERS TABLE ── */
+function renderUsersTable(){
+  const tb = document.getElementById('tbodyUsers');
+  if(!state.users.length){ tb.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-users"></i><p>Belum ada pengguna terverifikasi</p></div></td></tr>`; return; }
+  tb.innerHTML = state.users.map(u => `
+    <tr>
+      <td><strong>${esc(u.email||'—')}</strong></td>
+      <td>${u.googleVerified?'<span class="pill pill-blue"><i class=\"fab fa-google\"></i> Google</span>':'<span class=\"pill pill-green\">OTP Email</span>'}</td>
+      <td>${u.reportCount||0}</td>
+      <td>${fmtTime(u.firstSeen)}</td>
+      <td>${fmtTime(u.lastSeen)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   7. DETAIL MODAL
+═══════════════════════════════════════════════════════ */
+function openReport(id){
+  const r = state.reports.find(x => x.id === id);
+  if(!r) return;
+  document.getElementById('modalTitle').textContent = '📄 Detail Laporan Darurat';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email Pelapor</span><span class="dr-value">${esc(r.email||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Jenis Kejadian</span><span class="dr-value">${esc(r.jenis||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-calendar"></i><div><span class="dr-label">Tanggal</span><span class="dr-value">${esc(r.tanggal||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock"></i><div><span class="dr-label">Jam</span><span class="dr-value">${esc(r.jam||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-map-pin"></i><div><span class="dr-label">Koordinat</span><span class="dr-value">${r.lat?`<a target="_blank" href="https://www.google.com/maps?q=${r.lat},${r.lng}" style="color:var(--blue)">${r.lat}, ${r.lng} → Buka Peta</a>`:'—'}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment-medical"></i><div><span class="dr-label">Kronologi</span><span class="dr-value">${esc(r.kronologi||'(kosong)')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-microphone"></i><div><span class="dr-label">Rekaman</span><span class="dr-value">${esc(r.audioNote||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-mobile-alt"></i><div><span class="dr-label">Perangkat</span><span class="dr-value" style="font-size:.72rem">${esc(r.deviceInfo||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock-rotate-left"></i><div><span class="dr-label">Diterima</span><span class="dr-value">${fmtTime(r.createdAt)}</span></div></div>
+    <div class="detail-row"><i class="fas fa-circle-info"></i><div><span class="dr-label">Status</span><span class="dr-value">${pillForStatus(r.status)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <a class="btn btn-green btn-sm" target="_blank" href="https://wa.me/${r.phone||''}?text=${encodeURIComponent('Laporan BANDUL — '+r.jenis+' di lokasi '+r.lat+','+r.lng)}"><i class="fab fa-whatsapp"></i> Balas</a>
+    <button class="btn btn-amber btn-sm" onclick="updateReportStatus('${r.id}','diproses')"><i class="fas fa-spinner"></i> Tandai Diproses</button>
+    <button class="btn btn-blue btn-sm" onclick="updateReportStatus('${r.id}','selesai')"><i class="fas fa-check"></i> Tandai Selesai</button>
+    <button class="btn btn-red btn-sm" onclick="deleteReport('${r.id}')"><i class="fas fa-trash"></i> Hapus</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openLayanan(id){
+  const l = state.layanan.find(x => x.id === id);
+  if(!l) return;
+  document.getElementById('modalTitle').textContent = '🆘 Detail Permintaan Layanan';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email</span><span class="dr-value">${esc(l.email||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Jenis Layanan</span><span class="dr-value">${esc(l.jenis||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment"></i><div><span class="dr-label">Pesan</span><span class="dr-value">${esc(l.pesan||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-phone"></i><div><span class="dr-label">WA Target</span><span class="dr-value">${esc(l.waTarget||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-map-pin"></i><div><span class="dr-label">Koordinat</span><span class="dr-value">${l.lat?`<a target="_blank" href="https://www.google.com/maps?q=${l.lat},${l.lng}" style="color:var(--blue)">${l.lat}, ${l.lng}</a>`:'—'}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock-rotate-left"></i><div><span class="dr-label">Waktu</span><span class="dr-value">${fmtTime(l.createdAt)}</span></div></div>
+    <div class="detail-row"><i class="fas fa-circle-info"></i><div><span class="dr-label">Status</span><span class="dr-value">${pillForStatus(l.status)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-green btn-sm" onclick="updateDoc('layanan_requests','${l.id}','diproses')"><i class="fas fa-spinner"></i> Diproses</button>
+    <button class="btn btn-blue btn-sm" onclick="updateDoc('layanan_requests','${l.id}','selesai')"><i class="fas fa-check"></i> Selesai</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openPartisipasi(id){
+  const p = state.partisipasi.find(x => x.id === id);
+  if(!p) return;
+  document.getElementById('modalTitle').textContent = '🤝 Detail Partisipasi';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email</span><span class="dr-value">${esc(p.email||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Bentuk</span><span class="dr-value">${esc(p.jenis||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment"></i><div><span class="dr-label">Pesan</span><span class="dr-value">${esc(p.pesan||'—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock"></i><div><span class="dr-label">Waktu</span><span class="dr-value">${fmtTime(p.createdAt)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-blue btn-sm" onclick="updateDoc('partisipasi','${p.id}','diproses')"><i class="fas fa-check"></i> Ditindaklanjuti</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════════
+   8. UPDATE / DELETE
+═══════════════════════════════════════════════════════ */
+async function updateReportStatus(id, status){
   try {
-    await db.collection('reports').doc(id).update({
-      status: v,
-      updatedAt: FV.serverTimestamp(),
-      updatedBy: auth.currentUser.email
-    });
-    toast('✅ Status diperbarui', 'ok');
+    await db.collection('reports').doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast('✅ Status diperbarui: ' + status);
     closeModal();
-  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+  } catch(e){ showToast('❌ Gagal: ' + e.message); }
 }
-async function saveNotes(id) {
-  const notes = $('modalNotes').value;
+async function updateDoc(coll, id, status){
   try {
-    await db.collection('reports').doc(id).update({ notes, updatedAt: FV.serverTimestamp() });
-    toast('✅ Catatan tersimpan', 'ok');
-  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+    await db.collection(coll).doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast('✅ Status diperbarui');
+    closeModal();
+  } catch(e){ showToast('❌ Gagal: ' + e.message); }
 }
-async function deleteReport(id) {
-  if (!confirm('Hapus laporan ini secara permanen?')) return;
+async function deleteReport(id){
+  if(!confirm('Hapus laporan ini secara permanen?')) return;
   try {
     await db.collection('reports').doc(id).delete();
-    toast('🗑️ Laporan dihapus', 'ok');
+    showToast('🗑️ Laporan dihapus');
     closeModal();
-  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+  } catch(e){ showToast('❌ Gagal: ' + e.message); }
 }
 
-async function wipeOldReports() {
-  if (!confirm('Hapus semua laporan berstatus "resolved" yang lebih dari 30 hari?')) return;
-  const cutoff = Date.now() - 30*24*60*60*1000;
-  const old = allReports.filter(r => r.status === 'resolved' &&
-    r.createdAt && r.createdAt.toMillis && r.createdAt.toMillis() < cutoff);
-  if (!old.length) return toast('Tidak ada laporan lama', 'ok');
-  const batch = db.batch();
-  old.forEach(r => batch.delete(db.collection('reports').doc(r.id)));
-  await batch.commit();
-  toast(`🗑️ ${old.length} laporan dihapus`, 'ok');
-}
-
-/* ═══ EXPORT CSV ═══ */
-function exportCSV() {
-  const rows = allReports;
-  if (!rows.length) return toast('Tidak ada data', 'err');
-  const header = ['ID','Waktu','Jenis','Email','Lat','Lng','Tanggal','Jam','Kronologi','Status','Catatan'];
-  const csv = [header.join(',')].concat(rows.map(r => [
-    r.id, fmtDate(r.createdAt), r.jenis||'', r.userEmail||r.userId||'',
-    r.lat||'', r.lng||'', r.tanggal||'', r.jam||'',
-    (r.kronologi||'').replace(/"/g,'""'), r.status||'pending',
-    (r.notes||'').replace(/"/g,'""')
-  ].map(v => `"${v}"`).join(','))).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+/* ═══════════════════════════════════════════════════════
+   9. EXPORT CSV
+═══════════════════════════════════════════════════════ */
+function exportCSV(coll){
+  const data = state[coll];
+  if(!data.length){ showToast('⚠️ Tidak ada data untuk diexport'); return; }
+  const keys = [...new Set(data.flatMap(Object.keys))].filter(k => k !== 'createdAt');
+  const rows = [['id', ...keys, 'createdAt_iso']];
+  data.forEach(d => rows.push([
+    d.id,
+    ...keys.map(k => `"${String(d[k]??'').replace(/"/g,'""')}"`),
+    d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : ''
+  ]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type:'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `bandul-reports-${Date.now()}.csv`;
-  a.click();
+  a.href = url; a.download = `bandul_${coll}_${Date.now()}.csv`; a.click();
+  showToast('📥 CSV terunduh');
 }
 
-/* ═══ UTILS ═══ */
-function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmtDate(ts) {
-  if (!ts) return '-';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  if (isNaN(d.getTime())) return '-';
-  const now = Date.now();
-  const diff = (now - d.getTime()) / 1000;
-  if (diff < 60) return 'Baru saja';
-  if (diff < 3600) return Math.floor(diff/60) + ' mnt lalu';
-  if (diff < 86400) return Math.floor(diff/3600) + ' jam lalu';
-  return d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
-}
-function statusLabel(s) {
-  return {pending:'Pending', in_progress:'Diproses', resolved:'Selesai', rejected:'Ditolak'}[s || 'pending'];
-}
-function jenisIcon(j) {
-  const m = {
-    'Gempa Bumi':'fas fa-house-crack', 'Banjir':'fas fa-water', 'Tsunami':'fas fa-wave-square',
-    'Tanah Longsor':'fas fa-hill-rockslide', 'Kebakaran':'fas fa-fire',
-    'Perlindungan Anak':'fas fa-child-reaching', 'Medis Darurat':'fas fa-heart-pulse',
-    'Lainnya':'fas fa-circle-question'
-  };
-  return m[j] || 'fas fa-circle-question';
-}
-function jenisColor(j) {
-  const m = {
-    'Gempa Bumi':'#D62828', 'Banjir':'#1557C0', 'Tsunami':'#0B7DAA',
-    'Tanah Longsor':'#7B5E2A', 'Kebakaran':'#F4A261',
-    'Perlindungan Anak':'#7C3AED', 'Medis Darurat':'#D62828'
-  };
-  return m[j] || '#7A94AB';
-}
-
-/* Enter to login */
-['loginEmail','loginPass'].forEach(id => $(id).addEventListener('keydown', e => {
-  if (e.key === 'Enter') $('btnLogin').click();
-}));
+/* ═══════════════════════════════════════════════════════
+   10. INIT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  setConn(true);
+  showToast('🟢 Admin Panel aktif — Firebase listener berjalan', 3500);
+});
 </script>
 </body>
 </html>
