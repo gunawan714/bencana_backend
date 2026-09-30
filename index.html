@@ -2,603 +2,804 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BANDUL Admin Panel</title>
-<link rel="icon" type="image/png" href="https://fesbukbantennews.com/wp-content/uploads/2025/07/cropped-logo-fbn-2.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BANDUL Admin Panel · Banten Peduli</title>
+<link rel="icon" href="https://fesbukbantennews.com/wp-content/uploads/2025/07/cropped-logo-fbn-2.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <style>
-:root{
-  --blue:#0B3D91;--blue-mid:#1557C0;--blue-light:#EEF4FF;
-  --red:#D62828;--red-light:#FFF0F0;--green:#2DC653;--green-dark:#1A9E3F;--green-light:#EDFBF2;
-  --amber:#F4A261;--amber-light:#FFF6EE;--purple:#7C3AED;--purple-light:#F5F0FF;
-  --ink:#0D1B2A;--ink-mid:#3D5166;--ink-soft:#7A94AB;
-  --surface:#F4F7FB;--white:#FFF;--border:rgba(11,61,145,.10);
-  --shadow-sm:0 2px 8px rgba(11,61,145,.08);--shadow-md:0 8px 28px rgba(11,61,145,.12);
-}
+:root{--blue:#0B3D91;--blue-mid:#1557C0;--blue-light:#EEF4FF;--red:#D62828;--green:#2DC653;--amber:#F4A261;--ink:#0D1B2A;--ink-mid:#3D5166;--ink-soft:#7A94AB;--surface:#F4F7FB;--white:#fff;--border:rgba(11,61,145,.10);--shadow:0 8px 28px rgba(11,61,145,.12);}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);min-height:100dvh;line-height:1.5}
-h1,h2,h3,h4,button{font-family:'Poppins',sans-serif}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3,h4,button,.poppins{font-family:'Poppins',sans-serif}
 button{cursor:pointer;border:none;background:none;font-family:inherit}
-img{max-width:100%;display:block}
-.hidden{display:none!important}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--blue-mid);border-radius:6px}
+a{color:inherit;text-decoration:none}
+input,select,textarea{font-family:inherit}
 
 /* LOGIN */
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:24px;background:linear-gradient(160deg,#0B3D91 0%,#07285F 60%,#041B44 100%)}
-.login-box{width:100%;max-width:400px;background:#fff;border-radius:24px;padding:32px 28px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.login-logo{width:72px;height:72px;border-radius:50%;background:#fff;border:3px solid var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;overflow:hidden}
-.login-logo img{width:100%;height:100%;object-fit:cover}
-.login-box h1{font-size:1.5rem;font-weight:800;text-align:center;color:var(--blue)}
-.login-box .subtitle{text-align:center;font-size:.72rem;color:var(--ink-soft);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
-.input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:.9rem;background:var(--surface);outline:none;margin-bottom:10px;font-family:'Inter',sans-serif}
-.input:focus{border-color:var(--blue);background:#fff}
-.btn{width:100%;border-radius:50px;padding:13px 18px;font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Poppins',sans-serif;transition:.15s}
-.btn:active{transform:scale(.97)}
-.btn:disabled{opacity:.5;pointer-events:none}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-green{background:var(--green);color:#fff}
-.btn-red{background:var(--red);color:#fff}
-.btn-outline{background:#fff;border:1.5px solid var(--border);color:var(--ink-mid)}
-.btn-sm{padding:8px 14px;font-size:.75rem;width:auto}
-.error-msg{background:var(--red-light);color:var(--red);font-size:.78rem;font-weight:600;padding:10px 12px;border-radius:10px;margin-top:12px;display:none}
-.error-msg.show{display:block} 
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0B3D91,#07285F);padding:24px}
+.login-box{background:#fff;border-radius:24px;padding:36px 30px;max-width:420px;width:100%;box-shadow:0 30px 60px rgba(0,0,0,.3)}
+.login-box .logo{width:70px;height:70px;border-radius:50%;background:#fff;border:3px solid var(--blue-light);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.login-box .logo img{width:100%;height:100%;object-fit:cover}
+.login-box h1{font-size:1.3rem;font-weight:800;text-align:center;color:var(--blue);margin-bottom:4px}
+.login-box p{font-size:.82rem;color:var(--ink-soft);text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:.75rem;font-weight:600;color:var(--ink-mid);margin-bottom:6px}
+.login-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:.9rem;background:var(--surface);outline:none;transition:.2s}
+.login-field input:focus{border-color:var(--blue);background:#fff}
+.btn-login{width:100%;padding:14px;background:var(--blue);color:#fff;border-radius:50px;font-weight:700;font-size:.9rem;margin-top:8px;transition:.2s}
+.btn-login:hover{background:var(--blue-mid)}
+.btn-login:disabled{opacity:.5}
+.login-error{background:#FFF0F0;color:var(--red);padding:10px 14px;border-radius:10px;font-size:.78rem;margin-bottom:14px;display:none}
+.login-error.show{display:block}
 
-/* DASHBOARD */
-.app-header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(11,61,145,.25);position:sticky;top:0;z-index:100}
-.app-header .logo{width:38px;height:38px;border-radius:50%;background:#fff;overflow:hidden;flex-shrink:0}
-.app-header .logo img{width:100%;height:100%;object-fit:cover}
-.app-header .title{flex:1}
-.app-header .title h1{font-size:.95rem;font-weight:800}
-.app-header .title p{font-size:.68rem;opacity:.8}
-.app-header .user-info{font-size:.72rem;text-align:right;margin-right:8px;opacity:.9}
-.app-header button{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem}
-.container{max-width:1280px;margin:0 auto;padding:20px 16px}
+/* SHELL */
+.app-shell{display:none;min-height:100vh}
+.app-shell.on{display:flex}
+.sidebar{width:250px;background:linear-gradient(180deg,#0B3D91,#07285F);color:#fff;padding:22px 0;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;transition:transform .3s}
+.sidebar .brand{display:flex;align-items:center;gap:10px;padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar .brand img{width:38px;height:38px;border-radius:50%;background:#fff;padding:3px}
+.sidebar .brand h2{font-size:1rem;font-weight:800}
+.sidebar .brand span{font-size:.62rem;opacity:.7;letter-spacing:.08em;text-transform:uppercase}
+.nav-list{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.75);margin-bottom:4px;transition:.2s;cursor:pointer}
+.nav-link i{width:20px;text-align:center;font-size:1rem}
+.nav-link:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-link.active{background:rgba(255,255,255,.15);color:#fff;box-shadow:inset 3px 0 0 #F4A261}
+.nav-link .badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:50px;font-weight:700}
+.sidebar .logout{margin:12px;padding:12px;background:rgba(214,40,40,.15);color:#FFB4B4;border-radius:12px;font-size:.82rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.sidebar .logout:hover{background:rgba(214,40,40,.3)}
 
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
-.stat-card{background:#fff;border-radius:16px;padding:18px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px}
-.stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
-.stat-info strong{display:block;font-size:1.5rem;font-weight:900;color:var(--ink);line-height:1;font-family:'Poppins',sans-serif}
-.stat-info span{font-size:.7rem;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.main-area{flex:1;margin-left:250px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+.topbar .menu-toggle{display:none;font-size:1.2rem;color:var(--blue)}
+.topbar h1{font-size:1.1rem;font-weight:700;flex:1}
+.topbar .admin-chip{display:flex;align-items:center;gap:8px;background:var(--blue-light);color:var(--blue);padding:6px 14px;border-radius:50px;font-size:.75rem;font-weight:600}
+.topbar .admin-chip i{font-size:.9rem}
+.content{padding:24px 26px 40px;flex:1}
+.page-section{display:none}
+.page-section.on{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-.panel{background:#fff;border-radius:16px;border:1.5px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:16px;overflow:hidden}
-.panel-header{padding:16px 18px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.panel-header h2{font-size:1rem;font-weight:800;flex:1}
-.panel-header .filters{display:flex;gap:8px;flex-wrap:wrap}
-.panel-header select,.panel-header input{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;background:var(--surface);outline:none;font-family:'Inter',sans-serif}
-.panel-body{padding:0}
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--blue);position:relative;overflow:hidden}
+.stat-card.red{border-color:var(--red)}
+.stat-card.green{border-color:var(--green)}
+.stat-card.amber{border-color:var(--amber)}
+.stat-card .label{font-size:.72rem;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-card .value{font-size:1.9rem;font-weight:900;color:var(--ink);font-family:'Poppins',sans-serif}
+.stat-card .sub{font-size:.72rem;color:var(--ink-soft);margin-top:4px}
+.stat-card .icon{position:absolute;top:16px;right:16px;font-size:2rem;opacity:.1}
+.stat-card.red .icon{color:var(--red)}
+.stat-card.green .icon{color:var(--green)}
+.stat-card.amber .icon{color:var(--amber)}
 
-.chart-bars{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
-.bar-row{display:flex;align-items:center;gap:12px;font-size:.78rem}
-.bar-label{min-width:120px;font-weight:600;color:var(--ink-mid)}
-.bar-track{flex:1;height:10px;border-radius:5px;background:var(--surface);overflow:hidden}
-.bar-fill{height:100%;border-radius:5px;background:var(--blue);transition:width .5s ease}
-.bar-count{min-width:34px;text-align:right;font-weight:700;color:var(--ink);font-size:.78rem}
+/* PANELS */
+.panel{background:#fff;border-radius:18px;box-shadow:var(--shadow);margin-bottom:22px;overflow:hidden}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.panel-head h3{font-size:.95rem;font-weight:700;flex:1}
+.panel-head .actions{display:flex;gap:8px;flex-wrap:wrap}
+.panel-body{padding:18px 20px}
+.chart-wrap{position:relative;height:280px}
 
-.table-wrap{overflow-x:auto}
+/* TABLE */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters select,.filters input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;background:var(--surface);outline:none;min-width:130px}
+.filters select:focus,.filters input:focus{border-color:var(--blue);background:#fff}
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-th{background:var(--surface);text-align:left;padding:12px 14px;font-weight:700;color:var(--ink-mid);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-td{padding:12px 14px;border-top:1px solid var(--border);color:var(--ink-mid);vertical-align:top}
-tr:hover td{background:var(--blue-light)}
+thead th{background:var(--blue-light);color:var(--blue);font-weight:700;text-align:left;padding:11px 14px;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+tbody td{padding:12px 14px;border-top:1px solid var(--border);vertical-align:middle}
+tbody tr:hover{background:var(--surface)}
+.status-pill{display:inline-block;padding:4px 10px;border-radius:50px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.status-pending{background:#FFF6EE;color:#C45F00}
+.status-in_progress{background:var(--blue-light);color:var(--blue)}
+.status-resolved{background:#EDFBF2;color:#1A9E3F}
+.status-rejected{background:#FFF0F0;color:var(--red)}
+.jenis-pill{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--ink-mid)}
+.btn-mini{padding:6px 10px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--blue-light);color:var(--blue);transition:.15s}
+.btn-mini:hover{background:#DCE6FA}
+.btn-mini.green{background:#EDFBF2;color:#1A9E3F}
+.btn-mini.red{background:#FFF0F0;color:var(--red)}
+.btn-mini.amber{background:#FFF6EE;color:#C45F00}
 
-.badge{font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;border-radius:50px;white-space:nowrap;display:inline-block}
-.badge-baru{background:var(--amber-light);color:#C45F00}
-.badge-diproses{background:var(--blue-light);color:var(--blue)}
-.badge-selesai{background:var(--green-light);color:var(--green-dark)}
-.badge-ditolak{background:var(--red-light);color:var(--red)}
-.badge-admin{background:var(--purple-light);color:var(--purple)}
-
-.btn-action{padding:5px 10px;border-radius:8px;font-size:.7rem;font-weight:600;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:4px;margin-right:4px}
-.btn-view{background:var(--blue-light);color:var(--blue)}
+/* MAP */
+#adminMap{height:420px;border-radius:14px;overflow:hidden}
 
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-.overlay.open{display:flex}
-.modal{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:pop .25s ease}
-@keyframes pop{from{transform:scale(.94);opacity:.5}to{transform:scale(1);opacity:1}}
-.modal h3{font-size:1.05rem;font-weight:800;margin-bottom:4px}
-.modal .hint{font-size:.78rem;color:var(--ink-soft);margin-bottom:16px}
-.detail-row{padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;font-size:.83rem}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;backdrop-filter:blur(4px)}
+.modal-bg.on{display:flex}
+.modal-card{background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:26px}
+.modal-card h3{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.modal-card .close{position:absolute;top:20px;right:20px;font-size:1.1rem;color:var(--ink-soft)}
+.detail-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:.85rem}
 .detail-row:last-child{border-bottom:none}
-.detail-row strong{min-width:90px;color:var(--ink-soft);font-weight:600}
-.detail-row span{color:var(--ink-mid);flex:1;word-break:break-word}
-.form-label{font-size:.75rem;font-weight:600;color:var(--ink-mid);display:block;margin:14px 0 6px}
-select.input,textarea.input{resize:none}
-.empty{text-align:center;padding:50px 20px;color:var(--ink-soft)}
-.empty i{font-size:2.5rem;color:var(--blue-light);margin-bottom:10px}
-.loader{padding:40px;text-align:center;color:var(--ink-soft)}
-.loader i{font-size:1.5rem}
+.detail-row .k{color:var(--ink-soft);font-weight:600;min-width:110px}
+.detail-row .v{color:var(--ink);flex:1;word-break:break-word}
+#modalMap{height:220px;border-radius:12px;margin:12px 0;overflow:hidden}
 
-.toast{position:fixed;top:20px;right:20px;background:var(--ink);color:#fff;font-size:.8rem;padding:12px 20px;border-radius:10px;box-shadow:var(--shadow-md);opacity:0;transform:translateY(-10px);transition:.3s;z-index:9999;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:50px;font-size:.82rem;font-weight:500;z-index:9999;opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green)}
+.toast.err{background:var(--red)}
 
-.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--border);margin-bottom:16px;overflow-x:auto}
-.tab-btn{padding:10px 18px;font-size:.82rem;font-weight:700;font-family:'Poppins',sans-serif;color:var(--ink-soft);border-bottom:3px solid transparent;white-space:nowrap}
-.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
-@media(max-width:600px){
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .stat-icon{width:42px;height:42px;font-size:1.1rem}
-  .stat-info strong{font-size:1.25rem}
+/* Empty / Loader */
+.empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:.85rem}
+.empty i{font-size:2.4rem;color:var(--border);margin-bottom:10px;display:block}
+.loader{display:inline-block;width:20px;height:20px;border:3px solid rgba(11,61,145,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,#eef1f6 25%,#f6f8fb 50%,#eef1f6 75%);background-size:200% 100%;animation:skel 1.4s infinite;border-radius:6px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Mobile */
+@media(max-width:860px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-area{margin-left:0}
+  .topbar .menu-toggle{display:block}
+  .content{padding:16px}
+  .chart-wrap{height:230px}
+  #adminMap{height:320px}
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen">
+<!-- ═══════════ LOGIN ═══════════ -->
+<div class="login-wrap" id="loginWrap">
   <div class="login-box">
-    <div class="login-logo"><img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="Logo"></div>
+    <div class="logo"><img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="BANDUL"></div>
     <h1>BANDUL Admin</h1>
-    <div class="subtitle">Panel Monitoring &amp; Kontrol</div>
-    <input class="input" type="email" id="inpEmail" placeholder="Email admin" autocomplete="email">
-    <input class="input" type="password" id="inpPassword" placeholder="Password" autocomplete="current-password">
-    <button class="btn btn-blue" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Masuk</button>
-    <div id="loginError" class="error-msg"></div>
+    <p>Banten Peduli · Panel Monitoring</p>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-field">
+      <label>Email Admin</label>
+      <input type="email" id="loginEmail" placeholder="admin@bandul.id" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Masuk</button>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="appScreen" class="hidden">
-  <header class="app-header">
-    <div class="logo"><img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="Logo"></div>
-    <div class="title">
-      <h1>BANDUL Admin Panel</h1>
-      <p>Monitoring &amp; Laporan Banten Peduli</p>
-    </div>
-    <div class="user-info" id="userInfo">-</div>
-    <button id="btnLogout" title="Keluar"><i class="fas fa-sign-out-alt"></i></button>
-  </header>
-
-  <div class="container">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
-      <button class="tab-btn" data-tab="reports"><i class="fas fa-file-alt"></i> Laporan</button>
-      <button class="tab-btn" data-tab="users"><i class="fas fa-users"></i> Pengguna</button>
-    </div>
-
-    <!-- TAB: DASHBOARD -->
-    <div id="tab-dashboard" class="tab-panel active">
-      <div class="stats-grid" id="statsGrid"></div>
-
-      <div class="panel">
-        <div class="panel-header"><h2><i class="fas fa-chart-bar" style="color:var(--blue)"></i> Laporan per Jenis</h2></div>
-        <div class="chart-bars" id="chartJenis"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header"><h2><i class="fas fa-clock" style="color:var(--amber)"></i> Laporan per Status</h2></div>
-        <div class="chart-bars" id="chartStatus"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header"><h2><i class="fas fa-calendar" style="color:var(--green-dark)"></i> Tren 7 Hari Terakhir</h2></div>
-        <div class="chart-bars" id="chartTrend"></div>
+<!-- ═══════════ APP SHELL ═══════════ -->
+<div class="app-shell" id="appShell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="">
+      <div>
+        <h2>BANDUL</h2>
+        <span>Admin Panel</span>
       </div>
     </div>
+    <nav class="nav-list">
+      <div class="nav-link active" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+      <div class="nav-link" data-page="reports"><i class="fas fa-file-shield"></i> Laporan <span class="badge" id="badgeReports">0</span></div>
+      <div class="nav-link" data-page="users"><i class="fas fa-users"></i> Pengguna</div>
+      <div class="nav-link" data-page="map"><i class="fas fa-map-location-dot"></i> Peta Laporan</div>
+      <div class="nav-link" data-page="relawan"><i class="fas fa-people-group"></i> Relawan</div>
+      <div class="nav-link" data-page="settings"><i class="fas fa-gear"></i> Pengaturan</div>
+    </nav>
+    <button class="logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+  </aside>
 
-    <!-- TAB: REPORTS -->
-    <div id="tab-reports" class="tab-panel">
-      <div class="panel">
-        <div class="panel-header">
-          <h2><i class="fas fa-list"></i> Daftar Laporan</h2>
-          <div class="filters">
-            <select id="filterStatus">
-              <option value="">Semua Status</option>
-              <option value="baru">Baru</option>
-              <option value="diproses">Diproses</option>
-              <option value="selesai">Selesai</option>
-              <option value="ditolak">Ditolak</option>
-            </select>
-            <select id="filterJenis">
-              <option value="">Semua Jenis</option>
-              <option>Gempa Bumi</option><option>Banjir</option><option>Tsunami</option>
-              <option>Tanah Longsor</option><option>Kebakaran</option>
-              <option>Perlindungan Anak</option><option>Medis Darurat</option><option>Lainnya</option>
-            </select>
-            <input type="text" id="filterSearch" placeholder="🔍 Cari email / kronologi...">
-            <button class="btn btn-outline btn-sm" id="btnExport"><i class="fas fa-download"></i> CSV</button>
+  <div class="main-area">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="admin-chip"><i class="fas fa-circle-check"></i> <span id="adminEmail">admin</span></div>
+    </header>
+
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section class="page-section on" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="label">Total Laporan</div><div class="value" id="statTotal">0</div><div class="sub">Sepanjang waktu</div><i class="fas fa-file-shield icon"></i></div>
+          <div class="stat-card red"><div class="label">Pending</div><div class="value" id="statPending">0</div><div class="sub">Perlu tindakan</div><i class="fas fa-bell icon"></i></div>
+          <div class="stat-card green"><div class="label">Selesai</div><div class="value" id="statResolved">0</div><div class="sub">Telah ditangani</div><i class="fas fa-circle-check icon"></i></div>
+          <div class="stat-card amber"><div class="label">Pengguna</div><div class="value" id="statUsers">0</div><div class="sub">Terverifikasi</div><i class="fas fa-users icon"></i></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-chart-pie" style="color:var(--blue)"></i> Distribusi Jenis Bencana</h3>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap"><canvas id="chartJenis"></canvas></div>
           </div>
         </div>
-        <div class="panel-body">
-          <div class="table-wrap" id="reportsTableWrap">
-            <div class="loader"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- TAB: USERS -->
-    <div id="tab-users" class="tab-panel">
-      <div class="panel">
-        <div class="panel-header"><h2><i class="fas fa-users"></i> Daftar Pengguna</h2></div>
-        <div class="panel-body">
-          <div class="table-wrap" id="usersTableWrap">
-            <div class="loader"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-clock-rotate-left" style="color:var(--blue)"></i> Laporan Terbaru</h3>
+            <div class="actions"><button class="btn-mini" onclick="goPage('reports')">Lihat Semua <i class="fas fa-arrow-right"></i></button></div>
+          </div>
+          <div class="panel-body">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Waktu</th><th>Jenis</th><th>Email</th><th>Status</th><th></th></tr></thead>
+                <tbody id="recentTable"><tr><td colspan="5" class="empty"><span class="loader"></span></td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="page-section" id="page-reports">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-file-shield" style="color:var(--blue)"></i> Semua Laporan</h3>
+            <div class="actions">
+              <button class="btn-mini green" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="filters">
+              <select id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="in_progress">Diproses</option>
+                <option value="resolved">Selesai</option>
+                <option value="rejected">Ditolak</option>
+              </select>
+              <select id="filterJenis">
+                <option value="">Semua Jenis</option>
+                <option>Gempa Bumi</option><option>Banjir</option><option>Tsunami</option>
+                <option>Tanah Longsor</option><option>Kebakaran</option>
+                <option>Perlindungan Anak</option><option>Medis Darurat</option><option>Lainnya</option>
+              </select>
+              <input type="text" id="filterSearch" placeholder="Cari email / kronologi...">
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Waktu</th><th>Jenis</th><th>Email</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody id="reportsTable"><tr><td colspan="6" class="empty"><span class="loader"></span></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section class="page-section" id="page-users">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-users" style="color:var(--blue)"></i> Pengguna Terverifikasi</h3>
+          </div>
+          <div class="panel-body">
+            <div class="filters">
+              <input type="text" id="userSearch" placeholder="Cari email..." style="flex:1">
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Email</th><th>Laporan</th><th>Terakhir Aktif</th><th>Terdaftar</th></tr></thead>
+                <tbody id="usersTable"><tr><td colspan="4" class="empty"><span class="loader"></span></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MAP -->
+      <section class="page-section" id="page-map">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-map-location-dot" style="color:var(--blue)"></i> Sebaran Laporan</h3>
+            <div class="actions"><button class="btn-mini" onclick="fitAllMarkers()"><i class="fas fa-crosshairs"></i> Reset View</button></div>
+          </div>
+          <div class="panel-body">
+            <div id="adminMap"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RELAWAN -->
+      <section class="page-section" id="page-relawan">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fas fa-people-group" style="color:var(--blue)"></i> Data Relawan</h3>
+            <div class="actions"><button class="btn-mini green" onclick="seedRelawan()"><i class="fas fa-seedling"></i> Seed Data Awal</button></div>
+          </div>
+          <div class="panel-body">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>Wilayah</th><th>Nama</th><th>Peran</th><th>WA</th><th>Aktif</th></tr></thead>
+                <tbody id="relawanTable"><tr><td colspan="5" class="empty"><span class="loader"></span></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page-section" id="page-settings">
+        <div class="panel">
+          <div class="panel-head"><h3><i class="fas fa-gear" style="color:var(--blue)"></i> Informasi Sistem</h3></div>
+          <div class="panel-body">
+            <div class="detail-row"><span class="k">Project ID</span><span class="v" id="cfgProject">-</span></div>
+            <div class="detail-row"><span class="k">Admin Aktif</span><span class="v" id="cfgAdmin">-</span></div>
+            <div class="detail-row"><span class="k">Versi Panel</span><span class="v">1.0.0</span></div>
+            <div class="detail-row"><span class="k">Database</span><span class="v">Firestore (realtime)</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3><i class="fas fa-database" style="color:var(--blue)"></i> Maintenance</h3></div>
+          <div class="panel-body">
+            <p style="font-size:.85rem;color:var(--ink-mid);margin-bottom:14px">Operasi berikut mempengaruhi seluruh data. Hati-hati!</p>
+            <button class="btn-mini red" style="padding:10px 16px;font-size:.82rem" onclick="wipeOldReports()"><i class="fas fa-trash"></i> Hapus Laporan Selesai > 30 Hari</button>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<div id="detailModal" class="overlay">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3 id="dTitle">Detail Laporan</h3>
-    <p class="hint" id="dSubtitle"></p>
-    <div id="dBody"></div>
-
-    <label class="form-label">Status Laporan</label>
-    <select class="input" id="dStatus">
-      <option value="baru">Baru</option>
-      <option value="diproses">Diproses</option>
-      <option value="selesai">Selesai</option>
-      <option value="ditolak">Ditolak</option>
-    </select>
-
-    <label class="form-label">Catatan / Balasan untuk Pelapor</label>
-    <textarea class="input" id="dNote" rows="3" placeholder="Contoh: Tim relawan sudah diberangkatkan ke lokasi..."></textarea>
-
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-outline" id="dCancel"><i class="fas fa-times"></i> Tutup</button>
-      <button class="btn btn-green" id="dSave"><i class="fas fa-save"></i> Simpan Perubahan</button>
-    </div>
+<!-- MODAL DETAIL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card" style="position:relative" id="modalCard">
+    <button class="close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <h3 id="modalTitle">Detail Laporan</h3>
+    <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:14px" id="modalSub">—</p>
+    <div id="modalContent"></div>
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div class="toast" id="toast"></div>
 
-<script type="module">
-/* ══════════════════════════════════════════════════════
-   🔧 KONFIGURASI FIREBASE — HARUS SAMA DENGAN index.html
-══════════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ⚙️ KONFIGURASI — GANTI DENGAN MILIK ANDA
+═══════════════════════════════════════════════════════════ */
+const firebaseConfig = {
   apiKey: "ISI_API_KEY",
-  authDomain: "ISI.firebaseapp.com",
-  projectId: "ISI",
-  storageBucket: "ISI.appspot.com",
-  messagingSenderId: "ISI",
-  appId: "ISI"
-};
-/* ══════════════════════════════════════════════════════ */
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, collection, doc, getDoc, getDocs, updateDoc,
-  query, orderBy, serverTimestamp, limit
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const app  = initializeApp(FIREBASE_CONFIG);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-
-const $ = id => document.getElementById(id);
-const showToast = (msg, ms=2600) => {
-  const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), ms);
-};
-const escapeHtml = s => String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-const fmtDate = ts => {
-  if (!ts) return '-';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-};
-const dayKey = ts => {
-  if (!ts) return null;
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  return d.toISOString().slice(0,10);
+  authDomain: "bandul-banten.firebaseapp.com",
+  projectId: "bandul-banten",
+  storageBucket: "bandul-banten.appspot.com",
+  messagingSenderId: "ISI_SENDER_ID",
+  appId: "ISI_APP_ID"
 };
 
-let state = { user:null, reports:[], users:[], filtered:[] };
+/* ═══ INIT ═══ */
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const FV   = firebase.firestore.FieldValue;
 
-/* ─── LOGIN ─── */
+document.getElementById('cfgProject').textContent = firebaseConfig.projectId;
+
+/* ═══ STATE ═══ */
+let allReports = [];
+let allUsers   = [];
+let allRelawan = [];
+let chartJenis = null;
+let map, markers = [];
+let mapBounds = null;
+
+/* ═══ AUTH ═══ */
+const $ = (id) => document.getElementById(id);
+function toast(msg, type='') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast on ' + type;
+  setTimeout(() => t.className = 'toast ' + type, 3000);
+}
+function showLoginErr(msg){ $('loginError').textContent = msg; $('loginError').classList.add('show'); }
+function hideLoginErr(){ $('loginError').classList.remove('show'); }
+
 $('btnLogin').addEventListener('click', async () => {
-  const email = $('inpEmail').value.trim();
-  const pass  = $('inpPassword').value;
-  if (!email || !pass) return showError('Email dan password wajib diisi.');
+  const email = $('loginEmail').value.trim();
+  const pass  = $('loginPass').value;
+  if (!email || !pass) return showLoginErr('Email & password wajib diisi.');
+  hideLoginErr();
+  const btn = $('btnLogin');
+  btn.disabled = true; btn.innerHTML = '<span class="loader" style="border-top-color:#fff"></span> Memuat...';
   try {
-    $('btnLogin').disabled = true;
-    $('btnLogin').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
-    hideError();
-    await signInWithEmailAndPassword(auth, email, pass);
+    await auth.signInWithEmailAndPassword(email, pass);
   } catch (e) {
-    showError('Login gagal: email atau password salah.');
-    $('btnLogin').disabled = false;
-    $('btnLogin').innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+    showLoginErr('Login gagal: ' + (e.message || 'Periksa kredensial.'));
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
   }
 });
 
-function showError(m){ const e=$('loginError'); e.textContent=m; e.classList.add('show'); }
-function hideError(){ $('loginError').classList.remove('show'); }
+$('btnLogout').addEventListener('click', () => auth.signOut());
 
-/* ─── AUTH ─── */
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    $('appScreen').classList.add('hidden');
-    $('loginScreen').classList.remove('hidden');
-    $('btnLogin').disabled = false;
-    $('btnLogin').innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+auth.onAuthStateChanged((user) => {
+  const btn = $('btnLogin');
+  if (user) {
+    $('loginWrap').style.display = 'none';
+    $('appShell').classList.add('on');
+    $('adminEmail').textContent = user.email;
+    $('cfgAdmin').textContent = user.email;
+    startRealtimeListeners();
+  } else {
+    $('loginWrap').style.display = 'flex';
+    $('appShell').classList.remove('on');
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+    stopListeners();
+  }
+});
+
+/* ═══ REALTIME LISTENERS ═══ */
+let unsubReports, unsubUsers, unsubRelawan;
+function startRealtimeListeners() {
+  unsubReports = db.collection('reports').orderBy('createdAt', 'desc').limit(500)
+    .onSnapshot(snap => {
+      allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderDashboard();
+      renderReportsTable();
+      renderMap();
+      const pending = allReports.filter(r => r.status === 'pending').length;
+      $('badgeReports').textContent = pending;
+      $('badgeReports').style.display = pending ? 'inline-block' : 'none';
+    }, err => console.error('reports', err));
+
+  unsubUsers = db.collection('users').orderBy('lastActive', 'desc').limit(500)
+    .onSnapshot(snap => {
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderUsersTable();
+      $('statUsers').textContent = allUsers.length;
+    }, err => console.error('users', err));
+
+  unsubRelawan = db.collection('relawan').orderBy('wilayah')
+    .onSnapshot(snap => {
+      allRelawan = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderRelawanTable();
+    }, err => console.error('relawan', err));
+}
+function stopListeners(){
+  unsubReports && unsubReports(); unsubUsers && unsubUsers(); unsubRelawan && unsubRelawan();
+}
+
+/* ═══ NAVIGATION ═══ */
+const pageTitles = {dashboard:'Dashboard', reports:'Laporan', users:'Pengguna', map:'Peta Laporan', relawan:'Relawan', settings:'Pengaturan'};
+function goPage(p) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  $('page-'+p).classList.add('on');
+  document.querySelector(`.nav-link[data-page="${p}"]`)?.classList.add('active');
+  $('pageTitle').textContent = pageTitles[p] || p;
+  $('sidebar').classList.remove('open');
+  if (p === 'map') setTimeout(() => { map && map.invalidateSize(); }, 150);
+}
+document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => goPage(n.dataset.page)));
+$('menuToggle').addEventListener('click', () => $('sidebar').classList.toggle('open'));
+
+/* ═══ DASHBOARD ═══ */
+function renderDashboard() {
+  $('statTotal').textContent    = allReports.length;
+  $('statPending').textContent  = allReports.filter(r => r.status === 'pending').length;
+  $('statResolved').textContent = allReports.filter(r => r.status === 'resolved').length;
+
+  // Chart
+  const counts = {};
+  allReports.forEach(r => { const k = r.jenis || 'Lainnya'; counts[k] = (counts[k] || 0) + 1; });
+  const labels = Object.keys(counts);
+  const data   = labels.map(l => counts[l]);
+  const palette = ['#0B3D91','#1557C0','#D62828','#F4A261','#2DC653','#7C3AED','#0B7DAA','#7A94AB'];
+
+  if (chartJenis) chartJenis.destroy();
+  const ctx = $('chartJenis');
+  if (!ctx) return;
+  chartJenis = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: labels.length ? labels : ['Belum ada data'], datasets: [{ data: data.length ? data : [1], backgroundColor: palette, borderWidth: 0 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { font: { family: 'Inter', size: 12 }, padding: 14 } } }
+    }
+  });
+
+  // Recent table
+  const recent = allReports.slice(0, 6);
+  const tbody = $('recentTable');
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty"><i class="fas fa-inbox"></i>Belum ada laporan</td></tr>';
     return;
   }
-  // Cek role admin
-  const userRef = doc(db, 'users', user.uid);
-  const userSnap = await getDoc(userRef);
-  const role = userSnap.exists() ? userSnap.data().role : 'user';
-  if (role !== 'admin') {
-    await signOut(auth);
-    showError('Akun ini bukan admin. Hubungi administrator untuk akses.');
-    return;
-  }
-  state.user = user;
-  $('loginScreen').classList.add('hidden');
-  $('appScreen').classList.remove('hidden');
-  $('userInfo').textContent = user.email;
-  loadAll();
-});
-
-$('btnLogout').addEventListener('click', () => signOut(auth));
-
-/* ─── TABS ─── */
-document.querySelectorAll('.tab-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    $('tab-' + b.dataset.tab).classList.add('active');
-  });
-});
-
-/* ─── LOAD DATA ─── */
-async function loadAll() {
-  try {
-    // Load reports
-    const rSnap = await getDocs(query(collection(db, 'reports'), orderBy('createdAt','desc'), limit(500)));
-    state.reports = rSnap.docs.map(d => ({ id:d.id, ...d.data() }));
-    // Load users
-    const uSnap = await getDocs(collection(db, 'users'));
-    state.users = uSnap.docs.map(d => ({ id:d.id, ...d.data() }));
-
-    renderStats();
-    renderCharts();
-    renderReportsTable();
-    renderUsersTable();
-  } catch (e) {
-    console.error(e);
-    showToast('❌ Gagal memuat data: ' + e.message, 3500);
-  }
+  tbody.innerHTML = recent.map(r => `
+    <tr>
+      <td>${fmtDate(r.createdAt)}</td>
+      <td><span class="jenis-pill"><i class="${jenisIcon(r.jenis)}" style="color:${jenisColor(r.jenis)}"></i>${r.jenis || '-'}</span></td>
+      <td style="font-size:.78rem">${esc(r.userEmail || r.userId || '-')}</td>
+      <td><span class="status-pill status-${r.status || 'pending'}">${statusLabel(r.status)}</span></td>
+      <td><button class="btn-mini" onclick="openReport('${r.id}')">Detail</button></td>
+    </tr>`).join('');
 }
 
-/* ─── STATS ─── */
-function renderStats() {
-  const total = state.reports.length;
-  const baru  = state.reports.filter(r => r.status === 'baru').length;
-  const proses= state.reports.filter(r => r.status === 'diproses').length;
-  const selesai = state.reports.filter(r => r.status === 'selesai').length;
-  const userCount = state.users.length;
-  const today = new Date().toISOString().slice(0,10);
-  const todayCount = state.reports.filter(r => dayKey(r.createdAt) === today).length;
-
-  $('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-icon" style="background:var(--blue-light);color:var(--blue)"><i class="fas fa-file-alt"></i></div><div class="stat-info"><strong>${total}</strong><span>Total Laporan</span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:var(--amber-light);color:#C45F00"><i class="fas fa-circle-exclamation"></i></div><div class="stat-info"><strong>${baru}</strong><span>Baru</span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:var(--blue-light);color:var(--blue-mid)"><i class="fas fa-spinner"></i></div><div class="stat-info"><strong>${proses}</strong><span>Diproses</span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:var(--green-light);color:var(--green-dark)"><i class="fas fa-check-circle"></i></div><div class="stat-info"><strong>${selesai}</strong><span>Selesai</span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:var(--purple-light);color:var(--purple)"><i class="fas fa-users"></i></div><div class="stat-info"><strong>${userCount}</strong><span>Pengguna</span></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:var(--red-light);color:var(--red)"><i class="fas fa-calendar-day"></i></div><div class="stat-info"><strong>${todayCount}</strong><span>Hari Ini</span></div></div>
-  `;
-}
-
-function barRow(label, count, total, color) {
-  const pct = total ? Math.round(count/total*100) : 0;
-  return `<div class="bar-row">
-    <div class="bar-label">${escapeHtml(label)}</div>
-    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
-    <div class="bar-count">${count}</div>
-  </div>`;
-}
-
-function renderCharts() {
-  const total = state.reports.length || 1;
-
-  // By Jenis
-  const jenisCount = {};
-  state.reports.forEach(r => { jenisCount[r.jenis] = (jenisCount[r.jenis]||0)+1; });
-  const jenisSorted = Object.entries(jenisCount).sort((a,b)=>b[1]-a[1]);
-  $('chartJenis').innerHTML = jenisSorted.length
-    ? jenisSorted.map(([k,v]) => barRow(k, v, total, 'var(--blue)')).join('')
-    : '<div class="empty"><i class="fas fa-chart-bar"></i><p>Belum ada data</p></div>';
-
-  // By Status
-  const statuses = [['baru','Baru','var(--amber)'],['diproses','Diproses','var(--blue-mid)'],['selesai','Selesai','var(--green)'],['ditolak','Ditolak','var(--red)']];
-  const statusCount = {};
-  state.reports.forEach(r => { statusCount[r.status] = (statusCount[r.status]||0)+1; });
-  $('chartStatus').innerHTML = statuses.map(([k,l,c]) => barRow(l, statusCount[k]||0, total, c)).join('');
-
-  // Trend 7 hari
-  const days = [];
-  for (let i=6;i>=0;i--){
-    const d = new Date(); d.setDate(d.getDate()-i);
-    days.push(d.toISOString().slice(0,10));
-  }
-  const trend = {};
-  state.reports.forEach(r => {
-    const k = dayKey(r.createdAt);
-    if (k) trend[k] = (trend[k]||0)+1;
-  });
-  const maxTrend = Math.max(1, ...days.map(d => trend[d]||0));
-  $('chartTrend').innerHTML = days.map(d => {
-    const label = new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
-    const cnt = trend[d] || 0;
-    const pct = Math.round(cnt/maxTrend*100);
-    return `<div class="bar-row">
-      <div class="bar-label">${label}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--green)"></div></div>
-      <div class="bar-count">${cnt}</div>
-    </div>`;
-  }).join('');
-}
-
-/* ─── REPORTS TABLE ─── */
-function applyFilters() {
+/* ═══ REPORTS TABLE ═══ */
+function renderReportsTable() {
   const status = $('filterStatus').value;
   const jenis  = $('filterJenis').value;
-  const q      = $('filterSearch').value.toLowerCase().trim();
-  state.filtered = state.reports.filter(r => {
-    if (status && r.status !== status) return false;
-    if (jenis && r.jenis !== jenis) return false;
-    if (q) {
-      const hay = ((r.email||'')+' '+(r.kronologi||'')+' '+(r.displayName||'')).toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-  renderReportsTable();
-}
+  const q      = ($('filterSearch').value || '').toLowerCase();
 
-function renderReportsTable() {
-  const list = state.filtered.length || $('filterStatus').value || $('filterJenis').value || $('filterSearch').value
-    ? state.filtered
-    : state.reports;
+  let rows = allReports;
+  if (status) rows = rows.filter(r => (r.status || 'pending') === status);
+  if (jenis)  rows = rows.filter(r => r.jenis === jenis);
+  if (q)      rows = rows.filter(r =>
+    (r.userEmail || '').toLowerCase().includes(q) ||
+    (r.kronologi || '').toLowerCase().includes(q) ||
+    (r.userId || '').toLowerCase().includes(q)
+  );
 
-  if (!list.length) {
-    $('reportsTableWrap').innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>Belum ada laporan.</p></div>';
+  const tbody = $('reportsTable');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty"><i class="fas fa-inbox"></i>Tidak ada laporan yang cocok</td></tr>';
     return;
   }
-  const rows = list.map(r => {
-    const stLabel = { 'baru':'Baru','diproses':'Diproses','selesai':'Selesai','ditolak':'Ditolak' }[r.status] || r.status;
-    return `<tr>
-      <td><span class="badge badge-${r.status}">${stLabel}</span></td>
-      <td><strong>${escapeHtml(r.jenis)}</strong></td>
-      <td>${escapeHtml(r.displayName || '-')}<br><span style="font-size:.7rem;color:var(--ink-soft)">${escapeHtml(r.email||'')}</span></td>
-      <td style="max-width:280px">${escapeHtml((r.kronologi||'').slice(0,80))}${(r.kronologi||'').length>80?'...':''}</td>
-      <td style="white-space:nowrap">${fmtDate(r.createdAt)}</td>
-      <td><button class="btn-action btn-view" data-id="${r.id}"><i class="fas fa-eye"></i> Lihat</button></td>
-    </tr>`;
-  }).join('');
-
-  $('reportsTableWrap').innerHTML = `<table>
-    <thead><tr>
-      <th>Status</th><th>Jenis</th><th>Pelapor</th><th>Kronologi</th><th>Waktu</th><th>Aksi</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
-
-  document.querySelectorAll('.btn-view').forEach(b => {
-    b.addEventListener('click', () => openReportDetail(b.dataset.id));
-  });
-}
-
-['filterStatus','filterJenis'].forEach(id => $(id).addEventListener('change', applyFilters));
-$('filterSearch').addEventListener('input', applyFilters);
-
-/* ─── REPORT DETAIL MODAL ─── */
-let currentReportId = null;
-
-function openReportDetail(id) {
-  const r = state.reports.find(x => x.id === id);
-  if (!r) return;
-  currentReportId = id;
-  $('dTitle').textContent = r.jenis;
-  $('dSubtitle').textContent = `ID: ${r.id}`;
-  $('dBody').innerHTML = `
-    <div class="detail-row"><strong>Pelapor</strong><span>${escapeHtml(r.displayName||'-')} &lt;${escapeHtml(r.email||'')}&gt;</span></div>
-    <div class="detail-row"><strong>Waktu</strong><span>${r.tanggal||'-'} · ${r.jam||'-'}</span></div>
-    <div class="detail-row"><strong>Lokasi</strong><span><a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue)">${r.lat}, ${r.lng} <i class="fas fa-external-link-alt"></i></a></span></div>
-    <div class="detail-row"><strong>Kronologi</strong><span>${escapeHtml(r.kronologi||'')}</span></div>
-    <div class="detail-row"><strong>Dibuat</strong><span>${fmtDate(r.createdAt)}</span></div>
-    <div class="detail-row"><strong>Diperbarui</strong><span>${fmtDate(r.updatedAt)}</span></div>
-  `;
-  $('dStatus').value = r.status;
-  $('dNote').value = r.adminNote || '';
-  $('detailModal').classList.add('open');
-}
-
-$('dCancel').addEventListener('click', () => $('detailModal').classList.remove('open'));
-$('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') $('detailModal').classList.remove('open'); });
-
-$('dSave').addEventListener('click', async () => {
-  if (!currentReportId) return;
-  const btn = $('dSave');
-  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-  try {
-    await updateDoc(doc(db, 'reports', currentReportId), {
-      status: $('dStatus').value,
-      adminNote: $('dNote').value.trim(),
-      handledBy: state.user.uid,
-      updatedAt: serverTimestamp()
-    });
-    // Update local state
-    const idx = state.reports.findIndex(x => x.id === currentReportId);
-    if (idx >= 0) {
-      state.reports[idx].status = $('dStatus').value;
-      state.reports[idx].adminNote = $('dNote').value.trim();
-      state.reports[idx].handledBy = state.user.uid;
-      state.reports[idx].updatedAt = new Date();
-    }
-    renderStats(); renderCharts(); applyFilters();
-    $('detailModal').classList.remove('open');
-    showToast('✅ Laporan diperbarui');
-  } catch (e) {
-    showToast('❌ Gagal menyimpan: ' + e.message);
-  } finally {
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
-  }
-});
-
-/* ─── USERS TABLE ─── */
-function renderUsersTable() {
-  if (!state.users.length) {
-    $('usersTableWrap').innerHTML = '<div class="empty"><i class="fas fa-users"></i><p>Belum ada pengguna.</p></div>';
-    return;
-  }
-  const sorted = [...state.users].sort((a,b)=>{
-    const ta = a.createdAt?.seconds||0, tb = b.createdAt?.seconds||0;
-    return tb-ta;
-  });
-  const rows = sorted.map(u => `
+  tbody.innerHTML = rows.map(r => `
     <tr>
-      <td><strong>${escapeHtml(u.displayName || '-')}</strong></td>
-      <td>${escapeHtml(u.email || '-')}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-admin':'badge-diproses'}">${u.role||'user'}</span></td>
-      <td>${u.reportCount || 0}</td>
-      <td>${fmtDate(u.createdAt)}</td>
-      <td>${fmtDate(u.lastLogin)}</td>
-    </tr>
-  `).join('');
-  $('usersTableWrap').innerHTML = `<table>
-    <thead><tr>
-      <th>Nama</th><th>Email</th><th>Role</th><th>Total Laporan</th><th>Terdaftar</th><th>Login Terakhir</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+      <td style="font-size:.78rem">${fmtDate(r.createdAt)}</td>
+      <td><span class="jenis-pill"><i class="${jenisIcon(r.jenis)}" style="color:${jenisColor(r.jenis)}"></i>${r.jenis || '-'}</span></td>
+      <td style="font-size:.78rem">${esc(r.userEmail || r.userId || '-')}</td>
+      <td style="font-size:.72rem;color:var(--ink-soft)">${r.lat && r.lng ? `<a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue)"><i class="fas fa-map-pin"></i> Lihat</a>` : '-'}</td>
+      <td><span class="status-pill status-${r.status || 'pending'}">${statusLabel(r.status)}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn-mini" onclick="openReport('${r.id}')">Detail</button>
+      </td>
+    </tr>`).join('');
+}
+['filterStatus','filterJenis','filterSearch'].forEach(id => $(id).addEventListener('input', renderReportsTable));
+
+/* ═══ USERS TABLE ═══ */
+function renderUsersTable() {
+  const q = ($('userSearch').value || '').toLowerCase();
+  let rows = allUsers;
+  if (q) rows = rows.filter(u => (u.email || u.id || '').toLowerCase().includes(q));
+
+  const tbody = $('usersTable');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty"><i class="fas fa-users"></i>Belum ada pengguna</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(u => {
+    const email = u.email || u.id;
+    const count = allReports.filter(r => (r.userEmail === email || r.userId === email)).length;
+    return `
+      <tr>
+        <td style="font-weight:600">${esc(email)}</td>
+        <td>${count}</td>
+        <td style="font-size:.78rem;color:var(--ink-soft)">${fmtDate(u.lastActive)}</td>
+        <td style="font-size:.78rem;color:var(--ink-soft)">${fmtDate(u.createdAt)}</td>
+      </tr>`;
+  }).join('');
+}
+$('userSearch').addEventListener('input', renderUsersTable);
+
+/* ═══ RELAWAN TABLE ═══ */
+function renderRelawanTable() {
+  const tbody = $('relawanTable');
+  if (!allRelawan.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty"><i class="fas fa-people-group"></i>Belum ada data relawan. Klik "Seed Data Awal".</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allRelawan.map(r => `
+    <tr>
+      <td style="font-weight:600">${esc(r.wilayah || '-')}</td>
+      <td>${esc(r.nama || '-')}</td>
+      <td style="font-size:.78rem">${esc(r.role || '-')}</td>
+      <td style="font-size:.78rem"><a href="https://wa.me/${r.wa}" target="_blank" style="color:var(--green)"><i class="fab fa-whatsapp"></i> ${esc(r.wa || '-')}</a></td>
+      <td>${r.active === false ? '<span class="status-pill status-rejected">Nonaktif</span>' : '<span class="status-pill status-resolved">Aktif</span>'}</td>
+    </tr>`).join('');
 }
 
-/* ─── EXPORT CSV ─── */
-$('btnExport').addEventListener('click', () => {
-  const list = state.filtered.length ? state.filtered : state.reports;
-  if (!list.length) return showToast('Tidak ada data untuk diexport');
-  const headers = ['ID','Status','Jenis','Pelapor','Email','Latitude','Longitude','Kronologi','Tanggal','Jam','Catatan Admin','Dibuat'];
-  const rows = list.map(r => [
-    r.id, r.status, r.jenis, r.displayName, r.email, r.lat, r.lng,
-    (r.kronologi||'').replace(/[\r\n]+/g,' '),
-    r.tanggal||'', r.jam||'', (r.adminNote||'').replace(/[\r\n]+/g,' '),
-    fmtDate(r.createdAt)
-  ]);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
+async function seedRelawan() {
+  if (!confirm('Tambahkan 8 data relawan default?')) return;
+  const seed = [
+    {wilayah:'Kota Serang', nama:'Koordinator FBn Serang', role:'Posko Utama', wa:'6285712345678', active:true},
+    {wilayah:'Kab. Serang', nama:'Koordinator Kab. Serang', role:'Tanggap Bencana', wa:'6285712345679', active:true},
+    {wilayah:'Kota Cilegon', nama:'Relawan FBn Cilegon', role:'SAR & Evakuasi', wa:'6285712345680', active:true},
+    {wilayah:'Kab. Pandeglang', nama:'FBn Pandeglang Siaga', role:'Medis Lapangan', wa:'6285712345681', active:true},
+    {wilayah:'Kab. Lebak', nama:'FBn Lebak Tanggap', role:'Logistik & P3K', wa:'6285712345682', active:true},
+    {wilayah:'Kab. Tangerang', nama:'FBn Kab. Tangerang', role:'Koordinasi Cepat', wa:'6285712345683', active:true},
+    {wilayah:'Kota Tangerang', nama:'FBn Kota Tangerang', role:'Evakuasi & SAR', wa:'6285712345684', active:true},
+    {wilayah:'Tangsel', nama:'FBn Tangsel Peduli', role:'Bantuan Sosial', wa:'6285712345685', active:true}
+  ];
+  try {
+    const batch = db.batch();
+    seed.forEach(r => batch.set(db.collection('relawan').doc(), r));
+    await batch.commit();
+    toast('✅ 8 relawan ditambahkan', 'ok');
+  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+}
+
+/* ═══ MAP ═══ */
+function initMap() {
+  if (map) return;
+  map = L.map('adminMap').setView([-6.3, 106.2], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '© OpenStreetMap'
+  }).addTo(map);
+  mapBounds = L.latLngBounds();
+}
+function renderMap() {
+  if (!map) initMap();
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  mapBounds = L.latLngBounds();
+  allReports.forEach(r => {
+    if (!r.lat || !r.lng) return;
+    const color = statusColor(r.status);
+    const m = L.circleMarker([parseFloat(r.lat), parseFloat(r.lng)], {
+      radius: 8, color: '#fff', weight: 2, fillColor: color, fillOpacity: .9
+    }).addTo(map).bindPopup(`
+      <div style="font-family:Inter,sans-serif;font-size:.8rem">
+        <strong style="color:${color}">${r.jenis || '-'}</strong><br>
+        <span style="color:#666">${esc(r.userEmail || '')}</span><br>
+        <span style="color:#999;font-size:.72rem">${fmtDate(r.createdAt)}</span><br>
+        <a href="#" onclick="openReport('${r.id}');return false" style="color:#0B3D91;font-weight:600">Lihat Detail →</a>
+      </div>`);
+    markers.push(m);
+    mapBounds.extend([parseFloat(r.lat), parseFloat(r.lng)]);
+  });
+  if (markers.length && map) {
+    try { map.fitBounds(mapBounds.pad(.2)); } catch(e){}
+  }
+}
+function fitAllMarkers() {
+  if (map && markers.length) map.fitBounds(mapBounds.pad(.2));
+}
+function statusColor(s) {
+  return {pending:'#F4A261', in_progress:'#1557C0', resolved:'#2DC653', rejected:'#D62828'}[s || 'pending'];
+}
+
+/* ═══ MODAL DETAIL ═══ */
+let modalMap = null;
+function openReport(id) {
+  const r = allReports.find(x => x.id === id);
+  if (!r) return;
+  $('modalTitle').textContent = r.jenis || 'Detail Laporan';
+  $('modalSub').textContent = `ID: ${id} · ${fmtDate(r.createdAt)}`;
+
+  const emailVal = esc(r.userEmail || r.userId || '-');
+  $('modalContent').innerHTML = `
+    <div class="detail-row"><span class="k">Status</span><span class="v">
+      <select id="modalStatus" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:.82rem">
+        <option value="pending" ${r.status==='pending'||!r.status?'selected':''}>Pending</option>
+        <option value="in_progress" ${r.status==='in_progress'?'selected':''}>Diproses</option>
+        <option value="resolved" ${r.status==='resolved'?'selected':''}>Selesai</option>
+        <option value="rejected" ${r.status==='rejected'?'selected':''}>Ditolak</option>
+      </select>
+      <button class="btn-mini green" style="margin-left:8px" onclick="updateStatus('${id}')">Simpan</button>
+    </span></div>
+    <div class="detail-row"><span class="k">Pelapor</span><span class="v">${emailVal}</span></div>
+    <div class="detail-row"><span class="k">Tanggal</span><span class="v">${esc(r.tanggal || '-')} · ${esc(r.jam || '-')}</span></div>
+    <div class="detail-row"><span class="k">Koordinat</span><span class="v">
+      ${r.lat && r.lng ? `<a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue)">${r.lat}, ${r.lng}</a>` : '-'}
+    </span></div>
+    <div class="detail-row"><span class="k">Kronologi</span><span class="v">${esc(r.kronologi || '(tidak diisi)')}</span></div>
+    <div class="detail-row"><span class="k">Rekaman</span><span class="v">${esc(r.audioNote || 'Tidak ada')}</span></div>
+    <div class="detail-row"><span class="k">Catatan Admin</span><span class="v">
+      <textarea id="modalNotes" placeholder="Tambahkan catatan..." style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:.82rem;resize:vertical;min-height:60px">${esc(r.notes || '')}</textarea>
+    </span></div>
+    <div id="modalMap"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <a class="btn-mini green" style="padding:10px 14px;font-size:.8rem" href="https://wa.me/${(r.userEmail||'').replace(/\D/g,'')}" target="_blank"><i class="fab fa-whatsapp"></i> Hubungi Pelapor</a>
+      <button class="btn-mini amber" style="padding:10px 14px;font-size:.8rem" onclick="saveNotes('${id}')"><i class="fas fa-save"></i> Simpan Catatan</button>
+      <button class="btn-mini red" style="padding:10px 14px;font-size:.8rem" onclick="deleteReport('${id}')"><i class="fas fa-trash"></i> Hapus</button>
+    </div>`;
+  $('modalBg').classList.add('on');
+
+  setTimeout(() => {
+    if (modalMap) { modalMap.remove(); modalMap = null; }
+    if (r.lat && r.lng) {
+      modalMap = L.map('modalMap').setView([parseFloat(r.lat), parseFloat(r.lng)], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(modalMap);
+      L.marker([parseFloat(r.lat), parseFloat(r.lng)]).addTo(modalMap);
+    }
+  }, 100);
+}
+function closeModal() {
+  $('modalBg').classList.remove('on');
+  if (modalMap) { modalMap.remove(); modalMap = null; }
+}
+
+async function updateStatus(id) {
+  const v = $('modalStatus').value;
+  try {
+    await db.collection('reports').doc(id).update({
+      status: v,
+      updatedAt: FV.serverTimestamp(),
+      updatedBy: auth.currentUser.email
+    });
+    toast('✅ Status diperbarui', 'ok');
+    closeModal();
+  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+}
+async function saveNotes(id) {
+  const notes = $('modalNotes').value;
+  try {
+    await db.collection('reports').doc(id).update({ notes, updatedAt: FV.serverTimestamp() });
+    toast('✅ Catatan tersimpan', 'ok');
+  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+}
+async function deleteReport(id) {
+  if (!confirm('Hapus laporan ini secara permanen?')) return;
+  try {
+    await db.collection('reports').doc(id).delete();
+    toast('🗑️ Laporan dihapus', 'ok');
+    closeModal();
+  } catch(e) { toast('Gagal: ' + e.message, 'err'); }
+}
+
+async function wipeOldReports() {
+  if (!confirm('Hapus semua laporan berstatus "resolved" yang lebih dari 30 hari?')) return;
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  const old = allReports.filter(r => r.status === 'resolved' &&
+    r.createdAt && r.createdAt.toMillis && r.createdAt.toMillis() < cutoff);
+  if (!old.length) return toast('Tidak ada laporan lama', 'ok');
+  const batch = db.batch();
+  old.forEach(r => batch.delete(db.collection('reports').doc(r.id)));
+  await batch.commit();
+  toast(`🗑️ ${old.length} laporan dihapus`, 'ok');
+}
+
+/* ═══ EXPORT CSV ═══ */
+function exportCSV() {
+  const rows = allReports;
+  if (!rows.length) return toast('Tidak ada data', 'err');
+  const header = ['ID','Waktu','Jenis','Email','Lat','Lng','Tanggal','Jam','Kronologi','Status','Catatan'];
+  const csv = [header.join(',')].concat(rows.map(r => [
+    r.id, fmtDate(r.createdAt), r.jenis||'', r.userEmail||r.userId||'',
+    r.lat||'', r.lng||'', r.tanggal||'', r.jam||'',
+    (r.kronologi||'').replace(/"/g,'""'), r.status||'pending',
+    (r.notes||'').replace(/"/g,'""')
+  ].map(v => `"${v}"`).join(','))).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `bandul_reports_${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = URL.createObjectURL(blob);
+  a.download = `bandul-reports-${Date.now()}.csv`;
   a.click();
-  URL.revokeObjectURL(url);
-  showToast('✅ CSV diunduh');
-});
+}
+
+/* ═══ UTILS ═══ */
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtDate(ts) {
+  if (!ts) return '-';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  if (isNaN(d.getTime())) return '-';
+  const now = Date.now();
+  const diff = (now - d.getTime()) / 1000;
+  if (diff < 60) return 'Baru saja';
+  if (diff < 3600) return Math.floor(diff/60) + ' mnt lalu';
+  if (diff < 86400) return Math.floor(diff/3600) + ' jam lalu';
+  return d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+}
+function statusLabel(s) {
+  return {pending:'Pending', in_progress:'Diproses', resolved:'Selesai', rejected:'Ditolak'}[s || 'pending'];
+}
+function jenisIcon(j) {
+  const m = {
+    'Gempa Bumi':'fas fa-house-crack', 'Banjir':'fas fa-water', 'Tsunami':'fas fa-wave-square',
+    'Tanah Longsor':'fas fa-hill-rockslide', 'Kebakaran':'fas fa-fire',
+    'Perlindungan Anak':'fas fa-child-reaching', 'Medis Darurat':'fas fa-heart-pulse',
+    'Lainnya':'fas fa-circle-question'
+  };
+  return m[j] || 'fas fa-circle-question';
+}
+function jenisColor(j) {
+  const m = {
+    'Gempa Bumi':'#D62828', 'Banjir':'#1557C0', 'Tsunami':'#0B7DAA',
+    'Tanah Longsor':'#7B5E2A', 'Kebakaran':'#F4A261',
+    'Perlindungan Anak':'#7C3AED', 'Medis Darurat':'#D62828'
+  };
+  return m[j] || '#7A94AB';
+}
+
+/* Enter to login */
+['loginEmail','loginPass'].forEach(id => $(id).addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('btnLogin').click();
+}));
 </script>
 </body>
 </html>
