@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -779,6 +779,13 @@ tbody tr:last-child td { border-bottom: none; }
   background: var(--surface-2);
   font-family: 'Inter', sans-serif;
 }
+
+/* ─── FIX: Dark mode tile filter untuk OpenStreetMap ─── */
+/* Karena OSM tidak menyediakan versi dark, kita invert warnanya via CSS */
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+
 .leaflet-popup-content-wrapper {
   background: var(--surface);
   color: var(--text);
@@ -1302,9 +1309,9 @@ function toggleTheme() {
   applyTheme(current === 'dark' ? 'light' : 'dark');
 }
 
-/* Init theme dari localStorage atau default dark */
+/* Init theme dari localStorage atau default LIGHT */
 (function initTheme() {
-  const saved = localStorage.getItem('bandul_theme') || 'dark';
+  const saved = localStorage.getItem('bandul_theme') || 'light';
   document.documentElement.setAttribute('data-theme', saved);
 })();
 
@@ -1356,15 +1363,15 @@ function toggleSidebar() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   7. LEAFLET MAP — LIGHT / DARK TILES
+   7. LEAFLET MAP — OpenStreetMap (GRATIS, TANPA API KEY)
+   Untuk dark mode, tile OSM di-invert via CSS filter.
 ═══════════════════════════════════════════════════════ */
 let liveMap = null;
 let tileLayer = null;
 
+/* ✅ FIX: Pakai OpenStreetMap — 100% gratis, tidak pernah butuh API key */
 function getTileURL(theme) {
-  return theme === 'dark'
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
 
 function initMap() {
@@ -1405,8 +1412,9 @@ function initMap() {
 function updateMapTiles(theme) {
   if (!liveMap) return;
   if (tileLayer) liveMap.removeLayer(tileLayer);
+  // ✅ FIX: subdomains 'abc' untuk OSM (a, b, c)
   tileLayer = L.tileLayer(getTileURL(theme), {
-    subdomains: 'abcd',
+    subdomains: 'abc',
     maxZoom: 19,
     crossOrigin: true,
     errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -2152,8 +2160,8 @@ function exportAllCSV() {
    15. INIT
 ═══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
-  // Terapkan tema (sudah di-set di head)
-  const savedTheme = localStorage.getItem('bandul_theme') || 'dark';
+  // Terapkan tema — default LIGHT
+  const savedTheme = localStorage.getItem('bandul_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
