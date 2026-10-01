@@ -1,218 +1,1367 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#071A33">
-<title>BANDUL COMMAND CENTER</title>
+<meta name="theme-color" content="#0B3D91">
+<title>BANDUL Command Center — Admin Panel</title>
 <link rel="icon" href="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png">
-<!-- Fonts & Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<!-- Leaflet Map -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Firebase & Charts -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <style>
+/* ═══════════════════════════════════════════════════════
+   THEME SYSTEM (Light + Dark)
+═══════════════════════════════════════════════════════ */
 :root {
-  --bg-dark: #030B17;
-  --panel-bg: rgba(10, 25, 47, 0.85);
-  --panel-border: rgba(30, 70, 120, 0.5);
-  --blue: #1E60D1; --blue-light: #3A86FF;
-  --red: #FF003C; --red-glow: rgba(255, 0, 60, 0.4);
-  --green: #00E56A; --amber: #FFB703;
-  --text-main: #E2E8F0; --text-muted: #8892B0;
-  --glass: blur(12px);
+  /* LIGHT THEME (default) */
+  --bg:            #F4F7FB;
+  --surface:       #FFFFFF;
+  --surface-2:     #F8FAFD;
+  --surface-3:     #EEF4FF;
+  --text:          #0D1B2A;
+  --text-mid:      #3D5166;
+  --text-soft:     #7A94AB;
+  --border:        rgba(11, 61, 145, 0.10);
+  --border-strong: rgba(11, 61, 145, 0.20);
+
+  --primary:       #0B3D91;
+  --primary-mid:   #1557C0;
+  --primary-light: #EEF4FF;
+  --primary-glow:  rgba(11, 61, 145, 0.25);
+
+  --danger:        #D62828;
+  --danger-light:  #FFF0F0;
+  --success:       #2DC653;
+  --success-dark:  #1A9E3F;
+  --success-light: #EDFBF2;
+  --warning:       #F4A261;
+  --warning-light: #FFF6EE;
+  --purple:        #7C3AED;
+  --purple-light:  #F5F0FF;
+
+  --shadow-sm:     0 2px 8px rgba(11, 61, 145, 0.08);
+  --shadow-md:     0 8px 28px rgba(11, 61, 145, 0.12);
+  --shadow-lg:     0 20px 50px rgba(11, 61, 145, 0.15);
+
+  --sidebar-bg:    linear-gradient(180deg, #0B3D91 0%, #07285F 100%);
+  --sidebar-text:  rgba(255, 255, 255, 0.78);
+  --sidebar-active-bg: rgba(255, 255, 255, 0.15);
+  --sidebar-hover-bg:  rgba(255, 255, 255, 0.08);
+
+  --header-bg:     #FFFFFF;
+  --header-text:   #0D1B2A;
+  --header-border: rgba(11, 61, 145, 0.10);
+
+  --map-tint:      'light';
+  --grid-line:     rgba(11, 61, 145, 0.06);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+[data-theme="dark"] {
+  --bg:            #050D1A;
+  --surface:       #0D1F38;
+  --surface-2:     #0A192F;
+  --surface-3:     #122A47;
+  --text:          #E2E8F0;
+  --text-mid:      #A8B5CC;
+  --text-soft:     #6B7A93;
+  --border:        rgba(80, 130, 200, 0.15);
+  --border-strong: rgba(80, 130, 200, 0.30);
+
+  --primary:       #3A86FF;
+  --primary-mid:   #1E60D1;
+  --primary-light: rgba(58, 134, 255, 0.15);
+  --primary-glow:  rgba(58, 134, 255, 0.4);
+
+  --danger:        #FF3B5C;
+  --danger-light:  rgba(255, 59, 92, 0.12);
+  --success:       #00E56A;
+  --success-dark:  #00C256;
+  --success-light: rgba(0, 229, 106, 0.12);
+  --warning:       #FFB703;
+  --warning-light: rgba(255, 183, 3, 0.12);
+  --purple:        #A78BFA;
+  --purple-light:  rgba(167, 139, 250, 0.12);
+
+  --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:     0 8px 28px rgba(0, 0, 0, 0.4);
+  --shadow-lg:     0 20px 50px rgba(0, 0, 0, 0.5);
+
+  --sidebar-bg:    linear-gradient(180deg, #071A33 0%, #030B17 100%);
+  --sidebar-text:  rgba(200, 220, 255, 0.7);
+  --sidebar-active-bg: rgba(58, 134, 255, 0.2);
+  --sidebar-hover-bg:  rgba(255, 255, 255, 0.05);
+
+  --header-bg:     #071A33;
+  --header-text:   #E2E8F0;
+  --header-border: rgba(80, 130, 200, 0.20);
+
+  --map-tint:      'dark';
+  --grid-line:     rgba(80, 130, 200, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  height: 100vh;
-  overflow: hidden; /* Prevent body scroll, handle scroll in panels */
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4, h5, button { font-family: 'Poppins', sans-serif; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-mid); }
+::-webkit-scrollbar-track { background: transparent; }
+img { max-width: 100%; display: block; }
+
+/* ═══════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════ */
+.app-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--header-bg);
+  color: var(--header-text);
+  border-bottom: 1px solid var(--header-border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+  z-index: 900;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s;
+}
+.hamburger {
+  display: none;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+.header-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.header-brand img {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--border-strong);
+  object-fit: cover;
+}
+.header-brand h1 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+.header-brand span {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  font-family: 'Inter', sans-serif;
+}
+.header-center { flex: 1; display: flex; justify-content: center; }
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--danger-light);
+  color: var(--danger);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 50px;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--danger);
+}
+.live-badge::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.2);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  padding: 6px 12px;
+  background: var(--primary-light);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.conn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 50px;
+  background: var(--success-light);
+  color: var(--success-dark);
+  border: 1px solid var(--success);
+  transition: all 0.3s;
+}
+.conn-status.offline {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.conn-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+.conn-status.offline .conn-dot { background: var(--danger); }
+.theme-toggle {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { background: var(--primary-light); color: var(--primary); }
+.theme-toggle .icon-dark { display: none; }
+[data-theme="dark"] .theme-toggle .icon-dark { display: block; }
+[data-theme="dark"] .theme-toggle .icon-light { display: none; }
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: 64px; left: 0; bottom: 0;
+  width: 260px;
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 16px 12px;
+  overflow-y: auto;
+  z-index: 850;
+  transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
 }
-h1, h2, h3, h4, h5 { font-family: 'Poppins', sans-serif; }
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 6px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-
-/* --- HEADER --- */
-.header {
-  height: 60px;
-  background: var(--panel-bg);
-  backdrop-filter: var(--glass);
-  border-bottom: 1px solid var(--panel-border);
+.sidebar-brand {
+  padding: 6px 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 14px;
+}
+.sidebar-brand h2 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+.sidebar-brand p {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 3px;
+  font-family: 'Inter', sans-serif;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.nav-link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  z-index: 1000;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  color: var(--sidebar-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  position: relative;
+  text-align: left;
+  width: 100%;
 }
-.header-brand { display: flex; align-items: center; gap: 12px; }
-.header-brand img { width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
-.header-brand h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
-.header-brand span { color: var(--red); font-size: 0.7rem; padding: 2px 8px; border: 1px solid var(--red); border-radius: 4px; animation: pulseRed 2s infinite; }
-.header-info { display: flex; align-items: center; gap: 20px; font-size: 0.85rem; font-weight: 600; }
-.live-clock { font-family: 'Courier New', monospace; font-size: 1.1rem; color: var(--green); letter-spacing: 1px; }
+.nav-link i { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-link:hover { background: var(--sidebar-hover-bg); color: #fff; }
+.nav-link.active {
+  background: var(--sidebar-active-bg);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #fff;
+  border-radius: 0 3px 3px 0;
+}
+.nav-link .badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+  min-width: 22px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(214, 40, 40, 0.4);
+}
+.sidebar-footer {
+  padding: 14px 8px 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  line-height: 1.5;
+}
 
-/* --- MAIN LAYOUT --- */
+/* ═══════════════════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════════════════ */
+.main {
+  margin-left: 260px;
+  padding-top: 64px;
+  min-height: 100vh;
+  transition: margin-left 0.3s;
+}
+.section {
+  display: none;
+  padding: 22px 26px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+  animation: fadeInUp 0.35s cubic-bezier(0.22, 0.68, 0, 1.05) both;
+}
+.section.active { display: block; }
+.section.full-view { padding: 0; max-width: none; height: calc(100vh - 64px); overflow: hidden; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.topbar-title { flex: 1; min-width: 200px; }
+.topbar-title h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+.topbar-title p {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+.topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.15s;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 12px var(--primary-glow); }
+.btn-primary:hover { box-shadow: 0 6px 18px var(--primary-glow); }
+.btn-outline { background: var(--surface); border-color: var(--border-strong); color: var(--text-mid); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-success { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(45, 198, 83, 0.3); }
+.btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 12px rgba(214, 40, 40, 0.3); }
+.btn-warning { background: var(--warning); color: #fff; box-shadow: 0 4px 12px rgba(244, 162, 97, 0.3); }
+.btn-sm { padding: 7px 13px; font-size: 0.72rem; }
+.btn-icon { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 10px; }
+
+/* ═══════════════════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════════════════ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  opacity: 0.06;
+  background: var(--primary);
+  transition: transform 0.3s;
+}
+.stat-card:hover::after { transform: scale(1.15); }
+.stat-card.sc-red::after { background: var(--danger); }
+.stat-card.sc-green::after { background: var(--success); }
+.stat-card.sc-amber::after { background: var(--warning); }
+.stat-card.sc-purple::after { background: var(--purple); }
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 14px;
+  background: var(--primary-light);
+  color: var(--primary);
+  position: relative;
+  z-index: 1;
+}
+.stat-card.sc-red .stat-icon { background: var(--danger-light); color: var(--danger); }
+.stat-card.sc-green .stat-icon { background: var(--success-light); color: var(--success-dark); }
+.stat-card.sc-amber .stat-icon { background: var(--warning-light); color: #C45F00; }
+.stat-card.sc-purple .stat-icon { background: var(--purple-light); color: var(--purple); }
+.stat-card h3 {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  position: relative;
+  z-index: 1;
+}
+.stat-card p {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+.stat-trend {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--success-dark);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+}
+.stat-trend.down { color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════════
+   PANELS & CARDS
+═══════════════════════════════════════════════════════ */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.panel-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.panel-head h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.panel-head h3 i { color: var(--primary); }
+.panel-head p {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  width: 100%;
+  margin-top: -2px;
+}
+.panel-body { padding: 18px 20px; }
+.chart-wrap { position: relative; height: 300px; }
+
+/* ═══════════════════════════════════════════════════════
+   TABLES
+═══════════════════════════════════════════════════════ */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+thead th {
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  padding: 12px 14px;
+  border-bottom: 1.5px solid var(--border);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-mid);
+  vertical-align: middle;
+}
+tbody tr { transition: background 0.15s; }
+tbody tr:hover { background: var(--primary-light); }
+tbody tr:last-child td { border-bottom: none; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pill-red { background: var(--danger-light); color: var(--danger); }
+.pill-green { background: var(--success-light); color: var(--success-dark); }
+.pill-amber { background: var(--warning-light); color: #C45F00; }
+.pill-blue { background: var(--primary-light); color: var(--primary); }
+.pill-purple { background: var(--purple-light); color: var(--purple); }
+.pill-gray { background: var(--surface-3); color: var(--text-soft); }
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  align-items: center;
+}
+.filter-bar input, .filter-bar select {
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-family: 'Inter', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+  min-width: 0;
+}
+.filter-bar input:focus, .filter-bar select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.filter-bar input { flex: 1; min-width: 180px; }
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-soft);
+}
+.empty i { font-size: 3rem; margin-bottom: 14px; opacity: 0.35; }
+.empty p { font-size: 0.85rem; }
+
+/* ═══════════════════════════════════════════════════════
+   LIVE COMMAND CENTER (MAP + FEED + ANALYTICS)
+═══════════════════════════════════════════════════════ */
 .cc-layout {
   display: grid;
-  grid-template-columns: 340px 1fr 360px;
-  height: calc(100vh - 60px);
+  grid-template-columns: 320px 1fr 340px;
+  height: 100%;
+  overflow: hidden;
 }
-
-/* --- PANELS (LEFT & RIGHT) --- */
-.side-panel {
-  background: var(--panel-bg);
-  backdrop-filter: var(--glass);
-  border-right: 1px solid var(--panel-border);
+.cc-panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-.side-panel.right { border-right: none; border-left: 1px solid var(--panel-border); }
-.panel-header {
-  padding: 14px 20px;
-  background: rgba(0,0,0,0.3);
-  border-bottom: 1px solid var(--panel-border);
-  font-size: 0.9rem;
-  font-weight: 700;
+.cc-panel.right { border-right: none; border-left: 1px solid var(--border); }
+.cc-panel-header {
+  padding: 14px 18px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--blue-light);
-  display: flex; justify-content: space-between; align-items: center;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
 }
-.panel-content { flex: 1; overflow-y: auto; padding: 14px; }
+.cc-panel-header .count-badge {
+  font-size: 0.7rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 3px 9px;
+  border-radius: 50px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0;
+}
+.cc-panel-content { flex: 1; overflow-y: auto; padding: 12px; }
 
-/* --- LEFT FEED (REPORTS) --- */
+/* Feed items */
 .feed-item {
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-left: 4px solid var(--text-muted);
-  border-radius: 6px;
-  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--text-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
   margin-bottom: 10px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s;
 }
-.feed-item:hover { background: rgba(30, 96, 209, 0.15); border-color: var(--blue); }
-.feed-item.status-baru { border-left-color: var(--red); background: rgba(255, 0, 60, 0.05); }
-.feed-item.status-diproses { border-left-color: var(--amber); }
-.feed-item.status-selesai { border-left-color: var(--green); opacity: 0.6; }
-.feed-meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; }
-.feed-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.feed-desc { font-size: 0.75rem; color: var(--text-main); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.feed-audio { display: inline-flex; margin-top: 6px; font-size: 0.7rem; color: var(--blue-light); background: rgba(58, 134, 255, 0.1); padding: 2px 8px; border-radius: 12px; }
+.feed-item:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  border-left-color: var(--primary);
+  transform: translateX(3px);
+}
+.feed-item.status-baru { border-left-color: var(--danger); background: var(--danger-light); }
+.feed-item.status-baru:hover { background: rgba(214, 40, 40, 0.15); }
+.feed-item.status-diproses { border-left-color: var(--warning); background: var(--warning-light); }
+.feed-item.status-selesai { border-left-color: var(--success); opacity: 0.65; }
+.feed-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-soft);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.feed-meta .status-tag { font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.feed-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.feed-title i { color: var(--danger); font-size: 0.8rem; }
+.feed-desc {
+  font-size: 0.76rem;
+  color: var(--text-mid);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.feed-audio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.68rem;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 3px 9px;
+  border-radius: 50px;
+  font-weight: 700;
+}
 
-/* --- CENTER MAP --- */
-#map { width: 100%; height: 100%; background: #000; z-index: 1; }
-.leaflet-popup-content-wrapper { background: var(--panel-bg); color: #fff; border: 1px solid var(--blue); border-radius: 8px; }
-.leaflet-popup-tip { background: var(--panel-bg); }
-.popup-custom h3 { font-size: 1rem; color: var(--red); margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
-.popup-custom p { font-size: 0.8rem; margin-bottom: 4px; }
-.popup-actions { display: flex; gap: 6px; margin-top: 10px; }
+#ccMap { width: 100%; height: 100%; background: var(--surface-2); }
 
-/* Custom Pulsing Marker for Map */
-.pulse-marker { width: 24px; height: 24px; background: var(--red); border-radius: 50%; box-shadow: 0 0 0 rgba(255, 0, 60, 0.6); animation: pulseMap 1.5s infinite; border: 2px solid #fff; }
-.pulse-marker.diproses { background: var(--amber); box-shadow: 0 0 0 rgba(255, 183, 3, 0.6); animation: pulseMapAmber 2s infinite; }
-.pulse-marker.selesai { background: var(--green); border-radius: 50%; width: 16px; height: 16px; animation: none; border: 1px solid #fff; }
+/* Pulsing markers */
+.cc-marker {
+  width: 22px; height: 22px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 rgba(214, 40, 40, 0.7);
+  animation: markerPulse 1.6s infinite;
+  cursor: pointer;
+}
+.cc-marker.diproses {
+  background: var(--warning);
+  box-shadow: 0 0 0 rgba(244, 162, 97, 0.7);
+  animation: markerPulseAmber 2s infinite;
+}
+.cc-marker.selesai {
+  background: var(--success);
+  width: 14px; height: 14px;
+  border: 1.5px solid #fff;
+  animation: none;
+  box-shadow: 0 2px 6px rgba(45, 198, 83, 0.5);
+}
+@keyframes markerPulse {
+  0% { box-shadow: 0 0 0 0 rgba(214, 40, 40, 0.7); }
+  70% { box-shadow: 0 0 0 16px rgba(214, 40, 40, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(214, 40, 40, 0); }
+}
+@keyframes markerPulseAmber {
+  0% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(244, 162, 97, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 162, 97, 0); }
+}
 
-/* --- RIGHT ANALYTICS --- */
-.stat-box { background: rgba(0,0,0,0.4); border: 1px solid var(--panel-border); border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 14px; }
-.stat-box h4 { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-.stat-box .num { font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1.2; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
-.stat-box.alert .num { color: var(--red); text-shadow: 0 0 15px var(--red-glow); }
-.chart-container { height: 220px; width: 100%; margin-bottom: 20px; }
+/* Map popup styling */
+.leaflet-popup-content-wrapper {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.leaflet-popup-tip { background: var(--surface); }
+.leaflet-popup-content { margin: 14px 16px; }
+.cc-popup h3 {
+  font-size: 0.98rem;
+  color: var(--danger);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cc-popup p { font-size: 0.78rem; margin-bottom: 5px; color: var(--text-mid); }
+.cc-popup p strong { color: var(--text); font-weight: 700; }
+.cc-popup-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.cc-popup-actions .btn { padding: 6px 11px; font-size: 0.68rem; }
 
-/* --- BUTTONS --- */
-.btn { padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; color: #fff; font-family: 'Inter', sans-serif; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.btn-blue { background: var(--blue); border: 1px solid var(--blue-light); }
-.btn-amber { background: var(--amber); border: 1px solid #FFD166; color: #000; }
-.btn-green { background: var(--green); border: 1px solid #06D6A0; color: #000; }
+/* Analytics panel */
+.cc-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.cc-stat {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.cc-stat.alert {
+  background: var(--danger-light);
+  border-color: rgba(214, 40, 40, 0.2);
+}
+.cc-stat h4 {
+  font-size: 0.68rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.cc-stat .num {
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+  font-family: 'Poppins', sans-serif;
+}
+.cc-stat.alert .num { color: var(--danger); text-shadow: 0 0 20px var(--primary-glow); }
+.cc-chart-wrap {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.cc-chart-wrap h4 {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.cc-chart-container { height: 200px; position: relative; }
 
-/* --- ANIMATIONS --- */
-@keyframes pulseRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-@keyframes pulseMap { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 0, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); } }
-@keyframes pulseMapAmber { 0% { box-shadow: 0 0 0 0 rgba(255, 183, 3, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(255, 183, 3, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 183, 3, 0); } }
+/* ═══════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--surface);
+  border-radius: 22px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.28s cubic-bezier(0.22, 0.68, 0, 1.05);
+  border: 1px solid var(--border);
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-head {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+.modal-head h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  flex: 1;
+  color: var(--text);
+}
+.modal-close {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: var(--danger-light); color: var(--danger); }
+.modal-body { padding: 18px 24px; }
+.detail-row {
+  display: flex;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row i {
+  width: 22px;
+  color: var(--primary);
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.detail-row .dr-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 2px;
+}
+.detail-row .dr-value {
+  font-size: 0.88rem;
+  color: var(--text);
+  word-break: break-word;
+  font-weight: 500;
+}
+.modal-foot {
+  padding: 16px 24px 22px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  top: 84px;
+  right: 20px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 13px 22px;
+  border-radius: 50px;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition: all 0.3s;
+  pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  max-width: 380px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ═══════════════════════════════════════════════════════
+   LEAFLET DARK OVERRIDE
+═══════════════════════════════════════════════════════ */
+[data-theme="dark"] .leaflet-tile-pane { filter: brightness(0.75) contrast(1.15) hue-rotate(-10deg); }
+.leaflet-container { background: var(--surface-2); font-family: 'Inter', sans-serif; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .cc-layout { grid-template-columns: 280px 1fr 300px; }
+}
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .hamburger { display: flex; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .cc-layout { grid-template-columns: 1fr; overflow-y: auto; }
+  .cc-panel { max-height: 400px; border-right: none; border-left: none; border-bottom: 1px solid var(--border); }
+  .cc-panel.right { border-bottom: none; }
+  .section.full-view { height: auto; overflow: auto; }
+  .clock { display: none; }
+  .header-center { display: none; }
+}
+@media (max-width: 600px) {
+  .section { padding: 16px 14px 30px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { padding: 14px; }
+  .stat-card h3 { font-size: 1.5rem; }
+  .header-brand h1 { font-size: 0.9rem; }
+  .header-brand span { font-size: 0.6rem; }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
+<!-- ═══════════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
   <div class="header-brand">
-    <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="Logo BANDUL">
-    <h1>BANDUL COMMAND CENTER</h1>
-    <span>LIVE</span>
+    <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="BANDUL">
+    <div>
+      <h1>BANDUL</h1>
+      <span>Command Center</span>
+    </div>
   </div>
-  <div class="header-info">
-    <div id="connStatus" style="color: var(--green);"><i class="fas fa-wifi"></i> Terhubung ke Sistem</div>
-    <div class="live-clock" id="liveClock">00:00:00 WIB</div>
+  <div class="header-center">
+    <div class="live-badge">LIVE MONITORING</div>
+  </div>
+  <div class="header-right">
+    <div class="clock" id="liveClock">00:00:00</div>
+    <div class="conn-status" id="connStatus">
+      <div class="conn-dot"></div>
+      <span id="connText">Live</span>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Ganti tema">
+      <i class="fas fa-moon icon-light"></i>
+      <i class="fas fa-sun icon-dark"></i>
+    </button>
   </div>
 </header>
 
-<!-- MAIN LAYOUT -->
-<div class="cc-layout">
-  
-  <!-- LEFT PANEL: FEED -->
-  <aside class="side-panel">
-    <div class="panel-header">
-      <span><i class="fas fa-satellite-dish"></i> Radar Laporan</span>
-      <span style="font-size: 0.7rem; background: var(--blue); padding: 2px 6px; border-radius: 10px; color:#fff;" id="feedCount">0</span>
-    </div>
-    <div class="panel-content" id="feedContainer">
-      <!-- Feed items injected via JS -->
-      <div style="text-align:center; padding:40px 20px; opacity:0.5;">
-        <i class="fas fa-circle-notch fa-spin" style="font-size:2rem; margin-bottom:10px;"></i>
-        <p>Memuat transmisi data...</p>
+<!-- ═══════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <h2>Panel Kontrol</h2>
+    <p>Monitoring Siaga Bencana Banten</p>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-link active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button class="nav-link" data-section="command"><i class="fas fa-satellite-dish"></i> Command Center <span class="badge" id="badgeLive" style="display:none">0</span></button>
+    <button class="nav-link" data-section="reports"><i class="fas fa-file-medical"></i> Laporan Darurat <span class="badge" id="badgeReports" style="display:none">0</span></button>
+    <button class="nav-link" data-section="layanan"><i class="fas fa-hands-holding-heart"></i> Permintaan Layanan <span class="badge" id="badgeLayanan" style="display:none">0</span></button>
+    <button class="nav-link" data-section="partisipasi"><i class="fas fa-user-plus"></i> Partisipasi Warga</button>
+    <button class="nav-link" data-section="users"><i class="fas fa-users"></i> Pengguna</button>
+    <button class="nav-link" data-section="activity"><i class="fas fa-chart-line"></i> Log Aktivitas</button>
+    <button class="nav-link" data-section="config"><i class="fas fa-cog"></i> Pengaturan</button>
+  </nav>
+  <div class="sidebar-footer">
+    <div>© 2026 Fesbukbantennews</div>
+    <div style="margin-top:2px">v2.0 · Firebase Backend</div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- ─── DASHBOARD ─── -->
+  <section class="section active" id="sec-dashboard">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Dashboard</h2>
+        <p>Ringkasan aktivitas aplikasi BANDUL real-time</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('reports')"><i class="fas fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="location.reload()"><i class="fas fa-rotate"></i> Refresh</button>
       </div>
     </div>
-  </aside>
 
-  <!-- CENTER PANEL: MAP -->
-  <main id="map"></main>
-
-  <!-- RIGHT PANEL: ANALYTICS -->
-  <aside class="side-panel right">
-    <div class="panel-header">
-      <span><i class="fas fa-chart-pie"></i> Analitik Real-Time</span>
+    <div class="stat-grid">
+      <div class="stat-card sc-red">
+        <div class="stat-icon"><i class="fas fa-file-medical"></i></div>
+        <h3 id="stReports">0</h3>
+        <p>Total Laporan Darurat</p>
+        <div class="stat-trend" id="stReportsToday"><i class="fas fa-arrow-up"></i> 0 hari ini</div>
+      </div>
+      <div class="stat-card sc-amber">
+        <div class="stat-icon"><i class="fas fa-hands-holding-heart"></i></div>
+        <h3 id="stLayanan">0</h3>
+        <p>Permintaan Layanan</p>
+        <div class="stat-trend" id="stLayananToday">0 hari ini</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <h3 id="stUsers">0</h3>
+        <p>Pengguna Terverifikasi</p>
+        <div class="stat-trend" id="stUsersToday">0 baru hari ini</div>
+      </div>
+      <div class="stat-card sc-green">
+        <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+        <h3 id="stPartisipasi">0</h3>
+        <p>Partisipasi Warga</p>
+        <div class="stat-trend" id="stPartisipasiToday">0 hari ini</div>
+      </div>
     </div>
-    <div class="panel-content">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="stat-box alert">
-          <h4>Darurat Aktif</h4>
-          <div class="num" id="statActive">0</div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3><i class="fas fa-chart-line"></i> Tren Laporan 7 Hari Terakhir</h3>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3><i class="fas fa-chart-pie" style="color:var(--danger)"></i> Distribusi Jenis Kejadian</h3>
+      </div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:320px"><canvas id="chartJenis"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3><i class="fas fa-bolt" style="color:var(--warning)"></i> Laporan Terbaru</h3>
+        <button class="btn btn-outline btn-sm" onclick="switchSection('reports')">Lihat Semua →</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Waktu</th><th>Email</th><th>Jenis</th><th>Status</th><th>Lokasi</th></tr></thead>
+          <tbody id="recentReports"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMMAND CENTER (LIVE MAP) ─── -->
+  <section class="section full-view" id="sec-command">
+    <div class="cc-layout">
+      <!-- FEED PANEL -->
+      <aside class="cc-panel">
+        <div class="cc-panel-header">
+          <span><i class="fas fa-satellite-dish"></i> Radar Laporan</span>
+          <span class="count-badge" id="feedCount">0</span>
         </div>
-        <div class="stat-box">
-          <h4>Selesai Harian</h4>
-          <div class="num" id="statResolved">0</div>
+        <div class="cc-panel-content" id="feedContainer">
+          <div style="text-align:center;padding:40px 20px;color:var(--text-soft);">
+            <i class="fas fa-circle-notch fa-spin" style="font-size:1.8rem;margin-bottom:10px;color:var(--primary)"></i>
+            <p>Memuat transmisi data...</p>
+          </div>
         </div>
-      </div>
-      
-      <div class="stat-box" style="padding: 10px; text-align: left;">
-        <h4 style="margin-bottom: 10px; text-align: center;">Distribusi Bencana</h4>
-        <div class="chart-container"><canvas id="chartJenis"></canvas></div>
-      </div>
+      </aside>
 
-      <div class="stat-box" style="padding: 10px; text-align: left;">
-        <h4 style="margin-bottom: 10px; text-align: center;">Tren Laporan (7 Hari)</h4>
-        <div class="chart-container"><canvas id="chartTrend"></canvas></div>
+      <!-- MAP -->
+      <main id="ccMap"></main>
+
+      <!-- ANALYTICS -->
+      <aside class="cc-panel right">
+        <div class="cc-panel-header">
+          <span><i class="fas fa-chart-bar"></i> Analitik Live</span>
+        </div>
+        <div class="cc-panel-content">
+          <div class="cc-stat-grid">
+            <div class="cc-stat alert">
+              <h4>Darurat Aktif</h4>
+              <div class="num" id="ccStatActive">0</div>
+            </div>
+            <div class="cc-stat">
+              <h4>Selesai Hari Ini</h4>
+              <div class="num" id="ccStatResolved">0</div>
+            </div>
+          </div>
+
+          <div class="cc-chart-wrap">
+            <h4>Distribusi Bencana</h4>
+            <div class="cc-chart-container"><canvas id="ccChartJenis"></canvas></div>
+          </div>
+
+          <div class="cc-chart-wrap">
+            <h4>Tren 7 Hari</h4>
+            <div class="cc-chart-container"><canvas id="ccChartTrend"></canvas></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ─── REPORTS ─── -->
+  <section class="section" id="sec-reports">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Laporan Darurat</h2>
+        <p>Semua laporan bencana yang masuk dari pengguna BANDUL</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('reports')"><i class="fas fa-file-csv"></i> Export</button>
       </div>
     </div>
-  </aside>
+    <div class="filter-bar">
+      <input type="search" id="fReportSearch" placeholder="🔍 Cari email, jenis, kronologi...">
+      <select id="fReportStatus">
+        <option value="">Semua Status</option>
+        <option value="baru">Baru</option>
+        <option value="diproses">Diproses</option>
+        <option value="selesai">Selesai</option>
+      </select>
+      <select id="fReportJenis">
+        <option value="">Semua Jenis</option>
+        <option>Gempa Bumi</option><option>Banjir</option><option>Tsunami</option>
+        <option>Tanah Longsor</option><option>Kebakaran</option>
+        <option>Perlindungan Anak</option><option>Medis Darurat</option><option>Lainnya</option>
+      </select>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Waktu</th><th>Email</th><th>Jenis</th><th>Lokasi</th><th>Rekaman</th><th>Status</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="tbodyReports"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── LAYANAN ─── -->
+  <section class="section" id="sec-layanan">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Permintaan Layanan</h2>
+        <p>Permintaan bantuan medis, sosial, dan kemanusiaan</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('layanan')"><i class="fas fa-file-csv"></i> Export</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Waktu</th><th>Email</th><th>Jenis Layanan</th><th>Target WA</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyLayanan"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PARTISIPASI ─── -->
+  <section class="section" id="sec-partisipasi">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Partisipasi Warga</h2>
+        <p>Relawan, donasi, kendaraan, dan bantuan lainnya</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('partisipasi')"><i class="fas fa-file-csv"></i> Export</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Waktu</th><th>Email</th><th>Bentuk Partisipasi</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="tbodyPartisipasi"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── USERS ─── -->
+  <section class="section" id="sec-users">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Pengguna Terverifikasi</h2>
+        <p>Email yang telah terverifikasi OTP / Google Sign-In</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('users')"><i class="fas fa-file-csv"></i> Export</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Verifikasi</th><th>Total Laporan</th><th>Layanan</th><th>Pertama Dilihat</th><th>Terakhir Aktif</th></tr>
+          </thead>
+          <tbody id="tbodyUsers"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ACTIVITY LOG ─── -->
+  <section class="section" id="sec-activity">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Log Aktivitas</h2>
+        <p>Riwayat navigasi, OTP, dan interaksi pengguna</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportCSV('activity')"><i class="fas fa-file-csv"></i> Export</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Waktu</th><th>Aksi</th><th>Detail</th><th>Email</th><th>Perangkat</th></tr></thead>
+          <tbody id="tbodyActivity"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONFIG ─── -->
+  <section class="section" id="sec-config">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Pengaturan</h2>
+        <p>Konfigurasi backend & informasi sistem</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3><i class="fas fa-database"></i> Status Sistem</h3></div>
+      <div class="panel-body">
+        <div class="detail-row"><i class="fas fa-cube"></i><div><span class="dr-label">Firebase Project ID</span><span class="dr-value" id="cfgProjectId">—</span></div></div>
+        <div class="detail-row"><i class="fas fa-signal"></i><div><span class="dr-label">Status Koneksi</span><span class="dr-value" id="cfgConn">—</span></div></div>
+        <div class="detail-row"><i class="fas fa-database"></i><div><span class="dr-label">Koleksi Firestore</span><span class="dr-value">reports · users · layanan_requests · partisipasi · activity_logs · otp_logs · relawan_contacts</span></div></div>
+        <div class="detail-row"><i class="fas fa-shield-halved"></i><div><span class="dr-label">Versi Aplikasi</span><span class="dr-value">v2.0 · Unified Command Center</span></div></div>
+        <div class="detail-row"><i class="fas fa-clock"></i><div><span class="dr-label">Uptime Sesi</span><span class="dr-value" id="cfgUptime">0 detik</span></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3><i class="fas fa-circle-info"></i> Panduan Integrasi</h3></div>
+      <div class="panel-body" style="font-size:.85rem;color:var(--text-mid);line-height:1.8">
+        <p><strong style="color:var(--primary)">1.</strong> Buat project gratis di <a href="https://console.firebase.google.com" target="_blank" style="color:var(--primary);font-weight:700;text-decoration:underline">console.firebase.google.com</a></p>
+        <p><strong style="color:var(--primary)">2.</strong> Aktifkan <strong>Cloud Firestore</strong> (mode test untuk development)</p>
+        <p><strong style="color:var(--primary)">3.</strong> Salin konfigurasi Firebase ke dalam <code style="background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:4px;font-family:JetBrains Mono,monospace">firebaseConfig</code> di file ini <em>dan</em> di <code style="background:var(--primary-light);color:var(--primary);padding:2px 8px;border-radius:4px;font-family:JetBrains Mono,monospace">index.html</code> BANDUL</p>
+        <p><strong style="color:var(--primary)">4.</strong> Set <strong>Firestore Rules</strong> sesuai kebutuhan produksi</p>
+        <p><strong style="color:var(--primary)">5.</strong> Pastikan domain GitHub Pages sudah ada di <em>Authorized Domains</em></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <h3 id="modalTitle">Detail</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+'use strict';
+
 /* ═══════════════════════════════════════════════════════
    1. FIREBASE CONFIG — GANTI DENGAN PUNYA ANDA
 ═══════════════════════════════════════════════════════ */
@@ -225,146 +1374,600 @@ const firebaseConfig = {
   appId:             "1:1234567890:web:abcdef1234567890"
 };
 
-// Inisialisasi Firebase
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const startTime = Date.now();
+document.getElementById('cfgProjectId').textContent = firebaseConfig.projectId;
 
 /* ═══════════════════════════════════════════════════════
-   2. APP STATE & CLOCK
+   2. STATE
 ═══════════════════════════════════════════════════════ */
 const state = {
-  reports: [],
-  markers: {}, // Menyimpan instance Leaflet marker
-  charts: { jenis: null, trend: null }
+  reports:    [],
+  layanan:    [],
+  partisipasi:[],
+  users:      [],
+  activity:   [],
+  markers:    {},
+  map:        null,
+  mapReady:   false,
+  charts:     { trend:null, jenis:null, ccJenis:null, ccTrend:null },
+  currentSection: 'dashboard'
 };
 
+/* ═══════════════════════════════════════════════════════
+   3. THEME MANAGER
+═══════════════════════════════════════════════════════ */
+(function initTheme() {
+  const saved = localStorage.getItem('bandul-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('bandul-theme', next);
+  // Re-render charts dengan warna baru
+  setTimeout(() => {
+    if (state.currentSection === 'dashboard') renderDashboardCharts();
+    if (state.currentSection === 'command' && state.mapReady) {
+      switchMapTiles(next);
+      renderCommandCharts();
+    }
+  }, 120);
+  showToast(`🎨 Mode ${next === 'dark' ? 'Gelap' : 'Terang'} aktif`, 1800);
+}
+
+/* ═══════════════════════════════════════════════════════
+   4. LIVE CLOCK
+═══════════════════════════════════════════════════════ */
 function updateClock() {
   const now = new Date();
-  document.getElementById('liveClock').textContent = now.toLocaleTimeString('id-ID', { hour12: false }) + ' WIB';
+  const t = now.toLocaleTimeString('id-ID', { hour12: false });
+  document.getElementById('liveClock').textContent = t;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-/* ═══════════════════════════════════════════════════════
-   3. MAP INITIALIZATION (LEAFLET - DARK MODE)
-═══════════════════════════════════════════════════════ */
-// Base map di-set ke Banten area
-const map = L.map('map', { zoomControl: false }).setView([-6.3, 106.1], 9);
-
-// Gunakan CartoDB Dark Matter untuk tampilan Command Center
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-  subdomains: 'abcd',
-  maxZoom: 19
-}).addTo(map);
-
-// Tambahkan zoom control di kanan bawah agar tidak menutupi UI Kiri
-L.control.zoom({ position: 'bottomright' }).addTo(map);
+/* Uptime */
+setInterval(() => {
+  const s = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const uptimeEl = document.getElementById('cfgUptime');
+  if (uptimeEl) uptimeEl.textContent = h > 0 ? `${h}j ${m % 60}m` : m > 0 ? `${m}m ${s % 60}s` : `${s} detik`;
+}, 1000);
 
 /* ═══════════════════════════════════════════════════════
-   4. FIRESTORE REAL-TIME LISTENER
+   5. NAVIGATION
 ═══════════════════════════════════════════════════════ */
-db.collection('reports')
-  .orderBy('createdAt', 'desc')
-  .limit(200) // Batasi visualisasi 200 data terakhir agar ringan
-  .onSnapshot(snap => {
-    state.reports = [];
-    snap.forEach(doc => state.reports.push({ id: doc.id, ...doc.data() }));
-    
-    renderFeed();
-    renderMapMarkers();
-    renderAnalytics();
-  }, err => {
-    console.error("Firestore Listen Error:", err);
-    document.getElementById('connStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Terputus';
-    document.getElementById('connStatus').style.color = 'var(--red)';
-  });
+const SECTION_IDS = ['dashboard', 'command', 'reports', 'layanan', 'partisipasi', 'users', 'activity', 'config'];
 
-/* ═══════════════════════════════════════════════════════
-   5. RENDER FEED (SIDEBAR KIRI)
-═══════════════════════════════════════════════════════ */
-function renderFeed() {
-  const container = document.getElementById('feedContainer');
-  document.getElementById('feedCount').textContent = state.reports.length;
-  
-  if (!state.reports.length) {
-    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Tidak ada sinyal laporan.</div>';
-    return;
+function switchSection(id) {
+  if (!SECTION_IDS.includes(id)) return;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const target = document.getElementById('sec-' + id);
+  const navBtn = document.querySelector(`.nav-link[data-section="${id}"]`);
+  if (target) target.classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+  state.currentSection = id;
+  document.getElementById('sidebar').classList.remove('open');
+
+  // Init map saat pertama masuk ke Command Center
+  if (id === 'command') {
+    setTimeout(() => {
+      if (!state.mapReady) initCommandMap();
+      else if (state.map) setTimeout(() => state.map.invalidateSize(), 200);
+      renderFeed();
+      renderCommandStats();
+      renderCommandCharts();
+    }, 120);
   }
+}
 
-  let html = '';
-  state.reports.forEach(r => {
-    const statusClass = 'status-' + (r.status || 'baru');
-    const timeFmt = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : r.jam;
-    const hasAudio = (r.audioNote && r.audioNote !== 'Tidak ada rekaman') ? `<div class="feed-audio"><i class="fas fa-microphone"></i> Audio Tersedia</div>` : '';
-    
-    html += `
-      <div class="feed-item ${statusClass}" onclick="focusMap('${r.id}')">
-        <div class="feed-meta">
-          <span><i class="fas fa-clock"></i> ${timeFmt} WIB</span>
-          <span style="text-transform:uppercase; font-weight:700;">${r.status || 'BARU'}</span>
-        </div>
-        <div class="feed-title"><i class="fas fa-map-marker-alt" style="color:var(--red);"></i> ${r.jenis || 'Tidak Diketahui'}</div>
-        <div class="feed-desc">${escapeHTML(r.kronologi || 'Tidak ada deskripsi rinci.')}</div>
-        ${hasAudio}
-      </div>
-    `;
-  });
-  container.innerHTML = html;
+document.querySelectorAll('.nav-link').forEach(l => {
+  l.addEventListener('click', () => switchSection(l.dataset.section));
+});
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
 }
 
 /* ═══════════════════════════════════════════════════════
-   6. RENDER MAP MARKERS
+   6. UTIL
 ═══════════════════════════════════════════════════════ */
+function showToast(msg, dur = 2600) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), dur);
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+function fmtTime(ts) {
+  if (!ts) return '—';
+  try {
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleString('id-ID', {
+      day:'2-digit', month:'short', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  } catch(e) { return '—'; }
+}
+function fmtShort(ts) {
+  if (!ts) return '—';
+  try {
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  } catch(e) { return '—'; }
+}
+function isToday(ts) {
+  if (!ts) return false;
+  try {
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const n = new Date();
+    return d.getDate() === n.getDate() && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+  } catch(e) { return false; }
+}
+function pillForStatus(s) {
+  const map = { baru:'pill-red', diproses:'pill-amber', selesai:'pill-green' };
+  return `<span class="pill ${map[s] || 'pill-gray'}">${esc(s || 'baru')}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   7. FIRESTORE LISTENERS
+═══════════════════════════════════════════════════════ */
+function listenCollection(name, key, cb, orderField = 'createdAt') {
+  db.collection(name)
+    .orderBy(orderField, 'desc')
+    .limit(500)
+    .onSnapshot(
+      snap => {
+        const arr = [];
+        snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+        state[key] = arr;
+        cb && cb();
+        setConn(true);
+      },
+      err => {
+        console.warn('[listen]', name, err);
+        // Coba tanpa orderBy jika gagal
+        db.collection(name).limit(500).onSnapshot(
+          snap2 => {
+            const arr = [];
+            snap2.forEach(d => arr.push({ id: d.id, ...d.data() }));
+            state[key] = arr;
+            cb && cb();
+            setConn(true);
+          },
+          e2 => { console.warn('[listen-fallback]', name, e2); setConn(false); }
+        );
+      }
+    );
+}
+
+function setConn(ok) {
+  const el = document.getElementById('connStatus');
+  el.classList.toggle('offline', !ok);
+  document.getElementById('connText').textContent = ok ? 'Live' : 'Offline';
+  const cfgConn = document.getElementById('cfgConn');
+  if (cfgConn) cfgConn.textContent = ok ? '✅ Terhubung' : '❌ Tidak terhubung';
+}
+
+listenCollection('reports',           'reports',     renderAll);
+listenCollection('layanan_requests',  'layanan',     renderAll);
+listenCollection('partisipasi',       'partisipasi', renderAll);
+listenCollection('users',             'users',       renderAll, 'lastSeen');
+listenCollection('activity_logs',     'activity',    renderActivity, 'createdAt');
+
+/* ═══════════════════════════════════════════════════════
+   8. MASTER RENDER
+═══════════════════════════════════════════════════════ */
+function renderAll() {
+  renderStats();
+  renderBadges();
+  if (state.currentSection === 'dashboard') {
+    renderDashboardCharts();
+    renderRecentReports();
+  }
+  if (state.currentSection === 'reports')     renderReportsTable();
+  if (state.currentSection === 'layanan')     renderLayananTable();
+  if (state.currentSection === 'partisipasi') renderPartisipasiTable();
+  if (state.currentSection === 'users')       renderUsersTable();
+  if (state.currentSection === 'command' && state.mapReady) {
+    renderFeed();
+    renderMapMarkers();
+    renderCommandStats();
+    renderCommandCharts();
+  }
+}
+
+function renderActivity() {
+  if (state.currentSection === 'activity') renderActivityTable();
+}
+
+function renderBadges() {
+  const newReports = state.reports.filter(r => !r.status || r.status === 'baru').length;
+  const bR = document.getElementById('badgeReports');
+  bR.textContent = newReports;
+  bR.style.display = newReports ? 'inline-block' : 'none';
+
+  const bL = document.getElementById('badgeLayanan');
+  const newL = state.layanan.filter(l => !l.status || l.status === 'baru').length;
+  bL.textContent = newL;
+  bL.style.display = newL ? 'inline-block' : 'none';
+
+  const bLive = document.getElementById('badgeLive');
+  bLive.textContent = newReports;
+  bLive.style.display = newReports ? 'inline-block' : 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   9. DASHBOARD STATS & CHARTS
+═══════════════════════════════════════════════════════ */
+function renderStats() {
+  document.getElementById('stReports').textContent = state.reports.length;
+  const todayReports = state.reports.filter(r => isToday(r.createdAt)).length;
+  document.getElementById('stReportsToday').innerHTML = `<i class="fas fa-arrow-up"></i> ${todayReports} hari ini`;
+
+  document.getElementById('stLayanan').textContent = state.layanan.length;
+  const todayLayanan = state.layanan.filter(l => isToday(l.createdAt)).length;
+  document.getElementById('stLayananToday').textContent = `${todayLayanan} hari ini`;
+
+  document.getElementById('stUsers').textContent = state.users.length;
+  const todayUsers = state.users.filter(u => isToday(u.firstSeen)).length;
+  document.getElementById('stUsersToday').textContent = `${todayUsers} baru hari ini`;
+
+  document.getElementById('stPartisipasi').textContent = state.partisipasi.length;
+  const todayP = state.partisipasi.filter(p => isToday(p.createdAt)).length;
+  document.getElementById('stPartisipasiToday').textContent = `${todayP} hari ini`;
+}
+
+function getThemeColors() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    text:      isDark ? '#E2E8F0' : '#0D1B2A',
+    textSoft:  isDark ? '#8892B0' : '#7A94AB',
+    grid:      isDark ? 'rgba(80,130,200,0.1)' : 'rgba(11,61,145,0.08)',
+    primary:   isDark ? '#3A86FF' : '#0B3D91',
+    primaryBg: isDark ? 'rgba(58,134,255,0.18)' : 'rgba(11,61,145,0.12)',
+    border:    isDark ? '#0D1F38' : '#FFFFFF'
+  };
+}
+
+const PALETTE = ['#D62828', '#1557C0', '#00838F', '#7B5E2A', '#F4A261', '#7C3AED', '#2DC653', '#7A94AB'];
+
+function renderDashboardCharts() {
+  const C = getThemeColors();
+
+  // -- Trend (Line) --
+  const labels = [], counts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    const next = new Date(d); next.setDate(next.getDate() + 1);
+    labels.push(d.toLocaleDateString('id-ID', { day:'numeric', month:'short' }));
+    counts.push(state.reports.filter(r => {
+      const t = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+      return t >= d && t < next;
+    }).length);
+  }
+  const ctx1 = document.getElementById('chartTrend');
+  if (state.charts.trend) state.charts.trend.destroy();
+  state.charts.trend = new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Laporan',
+        data: counts,
+        borderColor: C.primary,
+        backgroundColor: C.primaryBg,
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: C.primary,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, color: C.textSoft }, grid: { color: C.grid } },
+        x: { ticks: { color: C.textSoft }, grid: { display: false } }
+      }
+    }
+  });
+
+  // -- Jenis (Doughnut) --
+  const jenisMap = {};
+  state.reports.forEach(r => { const j = r.jenis || 'Lainnya'; jenisMap[j] = (jenisMap[j] || 0) + 1; });
+  const ctx2 = document.getElementById('chartJenis');
+  if (state.charts.jenis) state.charts.jenis.destroy();
+  state.charts.jenis = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(jenisMap).length ? Object.keys(jenisMap) : ['Belum ada'],
+      datasets: [{
+        data: Object.values(jenisMap).length ? Object.values(jenisMap) : [1],
+        backgroundColor: PALETTE,
+        borderWidth: 3,
+        borderColor: C.border
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 11, family: 'Inter' }, padding: 14, color: C.text } }
+      }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   10. RECENT REPORTS (DASHBOARD)
+═══════════════════════════════════════════════════════ */
+function renderRecentReports() {
+  const tb = document.getElementById('recentReports');
+  const list = state.reports.slice(0, 8);
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada laporan masuk</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map(r => `
+    <tr style="cursor:pointer" onclick="openReport('${r.id}')">
+      <td style="white-space:nowrap">${fmtTime(r.createdAt)}</td>
+      <td><strong>${esc(r.email || '—')}</strong></td>
+      <td><span class="pill pill-blue">${esc(r.jenis || '—')}</span></td>
+      <td>${pillForStatus(r.status)}</td>
+      <td style="font-size:.72rem;color:var(--text-soft)">${r.lat ? `${r.lat}, ${r.lng}` : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   11. REPORTS TABLE
+═══════════════════════════════════════════════════════ */
+function renderReportsTable() {
+  const q       = document.getElementById('fReportSearch').value.toLowerCase();
+  const fStatus = document.getElementById('fReportStatus').value;
+  const fJenis  = document.getElementById('fReportJenis').value;
+  const tb = document.getElementById('tbodyReports');
+
+  let list = state.reports;
+  if (q) list = list.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+  if (fStatus) list = list.filter(r => (r.status || 'baru') === fStatus);
+  if (fJenis) list = list.filter(r => r.jenis === fJenis);
+
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="7"><div class="empty"><i class="fas fa-inbox"></i><p>Tidak ada laporan</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map(r => `
+    <tr>
+      <td style="white-space:nowrap">${fmtTime(r.createdAt)}</td>
+      <td>${esc(r.email || '—')}</td>
+      <td><span class="pill pill-blue">${esc(r.jenis || '—')}</span></td>
+      <td style="font-size:.75rem">${r.lat ? `<a target="_blank" href="https://www.google.com/maps?q=${r.lat},${r.lng}" style="color:var(--primary);font-weight:600">📍 Lihat</a>` : '—'}</td>
+      <td>${r.audioNote && r.audioNote !== 'Tidak ada rekaman' ? '🎙️' : '—'}</td>
+      <td>${pillForStatus(r.status)}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openReport('${r.id}')"><i class="fas fa-eye"></i></button></td>
+    </tr>
+  `).join('');
+}
+['fReportSearch','fReportStatus','fReportJenis'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', renderReportsTable);
+});
+
+/* ═══════════════════════════════════════════════════════
+   12. LAYANAN TABLE
+═══════════════════════════════════════════════════════ */
+function renderLayananTable() {
+  const tb = document.getElementById('tbodyLayanan');
+  if (!state.layanan.length) {
+    tb.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada permintaan</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = state.layanan.map(l => `
+    <tr>
+      <td>${fmtTime(l.createdAt)}</td>
+      <td>${esc(l.email || '—')}</td>
+      <td><span class="pill pill-amber">${esc(l.jenis || '—')}</span></td>
+      <td><a target="_blank" href="https://wa.me/${esc(l.waTarget || '')}" style="color:var(--success-dark);font-weight:600"><i class="fab fa-whatsapp"></i> ${esc(l.waTarget || '—')}</a></td>
+      <td>${pillForStatus(l.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openLayanan('${l.id}')"><i class="fas fa-eye"></i></button></td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   13. PARTISIPASI TABLE
+═══════════════════════════════════════════════════════ */
+function renderPartisipasiTable() {
+  const tb = document.getElementById('tbodyPartisipasi');
+  if (!state.partisipasi.length) {
+    tb.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-inbox"></i><p>Belum ada partisipasi</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = state.partisipasi.map(p => `
+    <tr>
+      <td>${fmtTime(p.createdAt)}</td>
+      <td>${esc(p.email || '—')}</td>
+      <td><span class="pill pill-green">${esc(p.jenis || '—')}</span></td>
+      <td>${pillForStatus(p.status)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openPartisipasi('${p.id}')"><i class="fas fa-eye"></i></button></td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   14. USERS TABLE
+═══════════════════════════════════════════════════════ */
+function renderUsersTable() {
+  const tb = document.getElementById('tbodyUsers');
+  if (!state.users.length) {
+    tb.innerHTML = `<tr><td colspan="6"><div class="empty"><i class="fas fa-users"></i><p>Belum ada pengguna terverifikasi</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = state.users.map(u => `
+    <tr>
+      <td><strong>${esc(u.email || '—')}</strong></td>
+      <td>${u.googleVerified ? '<span class="pill pill-blue"><i class="fab fa-google"></i> Google</span>' : '<span class="pill pill-green">OTP</span>'}</td>
+      <td>${u.reportCount || 0}</td>
+      <td>${u.layananCount || 0}</td>
+      <td>${fmtTime(u.firstSeen)}</td>
+      <td>${fmtTime(u.lastSeen)}</td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   15. ACTIVITY LOG TABLE
+═══════════════════════════════════════════════════════ */
+function renderActivityTable() {
+  const tb = document.getElementById('tbodyActivity');
+  if (!state.activity.length) {
+    tb.innerHTML = `<tr><td colspan="5"><div class="empty"><i class="fas fa-history"></i><p>Belum ada aktivitas</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = state.activity.slice(0, 200).map(a => {
+    const dev = a.deviceInfo || {};
+    return `
+      <tr>
+        <td style="white-space:nowrap">${fmtTime(a.createdAt)}</td>
+        <td><span class="pill pill-purple">${esc(a.action || '—')}</span></td>
+        <td>${esc(a.tab || a.nama || a.status || '—')}</td>
+        <td>${esc(a.email || '—')}</td>
+        <td style="font-size:.72rem;color:var(--text-soft)">${esc(dev.os || '')} ${esc(dev.browser || '')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   16. COMMAND CENTER MAP + FEED
+═══════════════════════════════════════════════════════ */
+function initCommandMap() {
+  const el = document.getElementById('ccMap');
+  if (!el || typeof L === 'undefined') return;
+
+  state.map = L.map('ccMap', { zoomControl: false }).setView([-6.3, 106.1], 9);
+  switchMapTiles(document.documentElement.getAttribute('data-theme'));
+  L.control.zoom({ position: 'bottomright' }).addTo(state.map);
+  state.mapReady = true;
+
+  // Render ulang semua marker
+  renderMapMarkers();
+}
+
+function switchMapTiles(theme) {
+  if (!state.map) return;
+  // Hapus tile lama
+  state.map.eachLayer(l => {
+    if (l instanceof L.TileLayer) state.map.removeLayer(l);
+  });
+  const url = theme === 'dark'
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  L.tileLayer(url, {
+    attribution: '© OpenStreetMap · CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(state.map);
+}
+
+function renderFeed() {
+  const container = document.getElementById('feedContainer');
+  const feedCount = document.getElementById('feedCount');
+  if (!container) return;
+  feedCount.textContent = state.reports.length;
+
+  if (!state.reports.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-soft);"><i class="fas fa-satellite" style="font-size:1.6rem;margin-bottom:10px;opacity:.4"></i><p>Tidak ada sinyal laporan.</p></div>';
+    return;
+  }
+
+  container.innerHTML = state.reports.map(r => {
+    const statusClass = 'status-' + (r.status || 'baru');
+    const timeFmt = fmtShort(r.createdAt) || r.jam || '';
+    const hasAudio = (r.audioNote && r.audioNote !== 'Tidak ada rekaman')
+      ? `<div class="feed-audio"><i class="fas fa-microphone"></i> Audio Tersedia</div>` : '';
+    return `
+      <div class="feed-item ${statusClass}" onclick="focusMap('${r.id}')">
+        <div class="feed-meta">
+          <span><i class="fas fa-clock"></i> ${timeFmt}</span>
+          <span class="status-tag">${r.status || 'BARU'}</span>
+        </div>
+        <div class="feed-title">
+          <i class="fas fa-map-marker-alt"></i> ${esc(r.jenis || 'Tidak Diketahui')}
+        </div>
+        <div class="feed-desc">${esc(r.kronologi || 'Tidak ada deskripsi rinci.')}</div>
+        ${hasAudio}
+      </div>
+    `;
+  }).join('');
+}
+
 function renderMapMarkers() {
+  if (!state.mapReady || !state.map) return;
   const currentIds = new Set(state.reports.map(r => r.id));
-  
-  // Hapus marker yang sudah tidak ada di data terbaru
+
+  // Hapus marker yang sudah tidak ada
   for (let id in state.markers) {
     if (!currentIds.has(id)) {
-      map.removeLayer(state.markers[id]);
+      state.map.removeLayer(state.markers[id]);
       delete state.markers[id];
     }
   }
 
-  // Tambah/Update marker
+  // Tambah / Update
   state.reports.forEach(r => {
-    if (!r.lat || !r.lng) return; // Skip jika tidak ada koordinat
-    
+    if (!r.lat || !r.lng) return;
     const status = r.status || 'baru';
-    const timeFmt = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString('id-ID') : (r.tanggal + ' ' + r.jam);
-    
-    // Buat icon berkedip (pulsing) berdasarkan status
+    const lat = parseFloat(r.lat);
+    const lng = parseFloat(r.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+
     const customIcon = L.divIcon({
-      className: 'custom-div-icon',
-      html: `<div class="pulse-marker ${status}"></div>`,
+      className: 'cc-marker-wrapper',
+      html: `<div class="cc-marker ${status}"></div>`,
       iconSize: [24, 24],
       iconAnchor: [12, 12]
     });
 
+    const timeFmt = fmtTime(r.createdAt) || (r.tanggal + ' ' + r.jam);
     const popupHtml = `
-      <div class="popup-custom">
-        <h3>${r.jenis}</h3>
+      <div class="cc-popup">
+        <h3><i class="fas fa-triangle-exclamation"></i> ${esc(r.jenis || 'Laporan')}</h3>
         <p><strong>Waktu:</strong> ${timeFmt}</p>
-        <p><strong>Pelapor:</strong> ${escapeHTML(r.email || 'Anonim')}</p>
-        <p><strong>Kronologi:</strong> ${escapeHTML(r.kronologi || 'Kosong')}</p>
-        <div class="popup-actions">
-          ${status !== 'selesai' ? `<button class="btn btn-amber" onclick="updateStatus('${r.id}', 'diproses')">Tugaskan</button>` : ''}
-          ${status === 'diproses' ? `<button class="btn btn-green" onclick="updateStatus('${r.id}', 'selesai')">Selesai</button>` : ''}
-          ${status === 'baru' ? `<button class="btn btn-blue" onclick="updateStatus('${r.id}', 'selesai')">Tandai Selesai</button>` : ''}
+        <p><strong>Pelapor:</strong> ${esc(r.email || 'Anonim')}</p>
+        <p><strong>Kronologi:</strong> ${esc(r.kronologi || 'Kosong')}</p>
+        <div class="cc-popup-actions">
+          ${status !== 'selesai' ? `<button class="btn btn-warning" onclick="updateReportStatus('${r.id}','diproses')"><i class="fas fa-spinner"></i> Proses</button>` : ''}
+          ${status !== 'selesai' ? `<button class="btn btn-success" onclick="updateReportStatus('${r.id}','selesai')"><i class="fas fa-check"></i> Selesai</button>` : ''}
+          ${status === 'selesai' ? `<button class="btn btn-outline" onclick="updateReportStatus('${r.id}','baru')"><i class="fas fa-rotate-left"></i> Buka Ulang</button>` : ''}
+          <a class="btn btn-primary" target="_blank" href="https://www.google.com/maps?q=${r.lat},${r.lng}"><i class="fas fa-map"></i> Peta</a>
         </div>
       </div>
     `;
 
     if (state.markers[r.id]) {
-      // Update marker yang sudah ada jika icon berubah (karena status)
       state.markers[r.id].setIcon(customIcon);
       state.markers[r.id].setPopupContent(popupHtml);
     } else {
-      // Buat marker baru
-      const marker = L.marker([parseFloat(r.lat), parseFloat(r.lng)], { icon: customIcon })
-        .bindPopup(popupHtml, { minWidth: 250 });
-      marker.addTo(map);
+      const marker = L.marker([lat, lng], { icon: customIcon })
+        .bindPopup(popupHtml, { minWidth: 260, maxWidth: 320 });
+      marker.addTo(state.map);
       state.markers[r.id] = marker;
     }
   });
@@ -372,135 +1975,267 @@ function renderMapMarkers() {
 
 function focusMap(id) {
   const marker = state.markers[id];
-  if (marker) {
+  if (marker && state.map) {
     const latLng = marker.getLatLng();
-    map.flyTo(latLng, 15, { duration: 1.5 });
-    setTimeout(() => marker.openPopup(), 1500);
+    state.map.flyTo(latLng, 14, { duration: 1.2 });
+    setTimeout(() => marker.openPopup(), 1100);
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   7. ANALYTICS & CHARTS
-═══════════════════════════════════════════════════════ */
-function renderAnalytics() {
+/* Command Center stats & charts */
+function renderCommandStats() {
   const today = new Date().toDateString();
-  
-  // Hitung Stat Kotak Atas
-  let activeCount = 0;
-  let resolvedToday = 0;
-
-  const jenisMap = {};
-  const trendMap = {}; // { 'YYYY-MM-DD': count }
-
-  // Siapkan struktur trend 7 hari ke belakang
-  for(let i=6; i>=0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    trendMap[d.toLocaleDateString('en-CA')] = 0; // Format YYYY-MM-DD
-  }
-
+  let active = 0, resolvedToday = 0;
   state.reports.forEach(r => {
     const s = r.status || 'baru';
-    if (s === 'baru' || s === 'diproses') activeCount++;
-    
-    // Parse tanggal
-    let rDateStr = '';
-    if (r.createdAt?.toDate) {
-      const d = r.createdAt.toDate();
-      if (d.toDateString() === today && s === 'selesai') resolvedToday++;
-      rDateStr = d.toLocaleDateString('en-CA');
-    }
-
-    // Chart Jenis
-    const j = r.jenis || 'Lainnya';
-    jenisMap[j] = (jenisMap[j] || 0) + 1;
-
-    // Chart Trend (hanya hitung jika tanggal masuk 7 hari rentang)
-    if (trendMap[rDateStr] !== undefined) {
-      trendMap[rDateStr]++;
-    }
+    if (s === 'baru' || s === 'diproses') active++;
+    if (s === 'selesai' && isToday(r.updatedAt || r.createdAt)) resolvedToday++;
   });
+  const a = document.getElementById('ccStatActive');
+  const b = document.getElementById('ccStatResolved');
+  if (a) a.textContent = active;
+  if (b) b.textContent = resolvedToday;
+}
 
-  document.getElementById('statActive').textContent = activeCount;
-  document.getElementById('statResolved').textContent = resolvedToday;
+function renderCommandCharts() {
+  const C = getThemeColors();
 
-  // -- Render Chart Jenis (Doughnut) --
-  const ctxJenis = document.getElementById('chartJenis');
-  const palette = ['#FF003C', '#1E60D1', '#00E56A', '#FFB703', '#8338EC', '#3A86FF', '#FB5607'];
-  
-  if (state.charts.jenis) state.charts.jenis.destroy();
-  state.charts.jenis = new Chart(ctxJenis, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(jenisMap),
-      datasets: [{
-        data: Object.values(jenisMap),
-        backgroundColor: palette,
-        borderColor: '#0A192F',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { color: '#E2E8F0', font: {family: 'Inter', size: 10} } }
+  // Jenis
+  const jenisMap = {};
+  state.reports.forEach(r => { const j = r.jenis || 'Lainnya'; jenisMap[j] = (jenisMap[j] || 0) + 1; });
+  const ctx1 = document.getElementById('ccChartJenis');
+  if (ctx1) {
+    if (state.charts.ccJenis) state.charts.ccJenis.destroy();
+    state.charts.ccJenis = new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(jenisMap).length ? Object.keys(jenisMap) : ['Kosong'],
+        datasets: [{
+          data: Object.values(jenisMap).length ? Object.values(jenisMap) : [1],
+          backgroundColor: PALETTE,
+          borderWidth: 2,
+          borderColor: C.border
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: { position: 'right', labels: { color: C.text, font: { size: 10, family: 'Inter' }, padding: 8, boxWidth: 10 } }
+        }
       }
-    }
-  });
+    });
+  }
 
-  // -- Render Chart Trend (Bar) --
-  const ctxTrend = document.getElementById('chartTrend');
-  const tLabels = Object.keys(trendMap).map(d => {
-    const [y,m,day] = d.split('-'); return `${day}/${m}`;
-  });
-  
-  if (state.charts.trend) state.charts.trend.destroy();
-  state.charts.trend = new Chart(ctxTrend, {
-    type: 'bar',
-    data: {
-      labels: tLabels,
-      datasets: [{
-        label: 'Laporan',
-        data: Object.values(trendMap),
-        backgroundColor: 'rgba(58, 134, 255, 0.7)',
-        borderColor: '#3A86FF',
-        borderWidth: 1,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { color: '#8892B0', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-        x: { ticks: { color: '#8892B0' }, grid: { display: false } }
+  // Trend
+  const labels = [], counts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
+    const next = new Date(d); next.setDate(next.getDate() + 1);
+    labels.push(d.getDate() + '/' + (d.getMonth() + 1));
+    counts.push(state.reports.filter(r => {
+      const t = r.createdAt?.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+      return t >= d && t < next;
+    }).length);
+  }
+  const ctx2 = document.getElementById('ccChartTrend');
+  if (ctx2) {
+    if (state.charts.ccTrend) state.charts.ccTrend.destroy();
+    state.charts.ccTrend = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Laporan',
+          data: counts,
+          backgroundColor: C.primaryBg,
+          borderColor: C.primary,
+          borderWidth: 1.5,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: C.textSoft, stepSize: 1 }, grid: { color: C.grid } },
+          x: { ticks: { color: C.textSoft, font: { size: 9 } }, grid: { display: false } }
+        }
       }
-    }
-  });
+    });
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
-   8. ACTIONS (UPDATE STATUS)
+   17. DETAIL MODAL
 ═══════════════════════════════════════════════════════ */
-// Terhubung dengan tombol di Popup Marker
-window.updateStatus = async function(id, status) {
+function openReport(id) {
+  const r = state.reports.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('modalTitle').textContent = '📄 Detail Laporan Darurat';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email Pelapor</span><span class="dr-value">${esc(r.email || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Jenis Kejadian</span><span class="dr-value">${esc(r.jenis || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-calendar"></i><div><span class="dr-label">Tanggal</span><span class="dr-value">${esc(r.tanggal || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock"></i><div><span class="dr-label">Jam</span><span class="dr-value">${esc(r.jam || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-map-pin"></i><div><span class="dr-label">Koordinat</span><span class="dr-value">${r.lat ? `<a target="_blank" href="https://www.google.com/maps?q=${r.lat},${r.lng}" style="color:var(--primary);font-weight:600">${r.lat}, ${r.lng} → Buka Peta</a>` : '—'}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment-medical"></i><div><span class="dr-label">Kronologi</span><span class="dr-value">${esc(r.kronologi || '(kosong)')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-microphone"></i><div><span class="dr-label">Rekaman</span><span class="dr-value">${esc(r.audioNote || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-mobile-alt"></i><div><span class="dr-label">Perangkat</span><span class="dr-value" style="font-size:.72rem">${esc(r.deviceInfo?.os || r.deviceInfo?.ua || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock-rotate-left"></i><div><span class="dr-label">Diterima</span><span class="dr-value">${fmtTime(r.createdAt)}</span></div></div>
+    <div class="detail-row"><i class="fas fa-circle-info"></i><div><span class="dr-label">Status</span><span class="dr-value">${pillForStatus(r.status)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-warning btn-sm" onclick="updateReportStatus('${r.id}','diproses')"><i class="fas fa-spinner"></i> Diproses</button>
+    <button class="btn btn-success btn-sm" onclick="updateReportStatus('${r.id}','selesai')"><i class="fas fa-check"></i> Selesai</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteReport('${r.id}')"><i class="fas fa-trash"></i> Hapus</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openLayanan(id) {
+  const l = state.layanan.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('modalTitle').textContent = '🆘 Detail Permintaan Layanan';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email</span><span class="dr-value">${esc(l.email || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Jenis Layanan</span><span class="dr-value">${esc(l.jenis || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment"></i><div><span class="dr-label">Pesan</span><span class="dr-value">${esc(l.pesan || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-phone"></i><div><span class="dr-label">WA Target</span><span class="dr-value"><a target="_blank" href="https://wa.me/${esc(l.waTarget || '')}" style="color:var(--success-dark);font-weight:600">${esc(l.waTarget || '—')}</a></span></div></div>
+    <div class="detail-row"><i class="fas fa-map-pin"></i><div><span class="dr-label">Koordinat</span><span class="dr-value">${l.lat ? `<a target="_blank" href="https://www.google.com/maps?q=${l.lat},${l.lng}" style="color:var(--primary)">${l.lat}, ${l.lng}</a>` : '—'}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock-rotate-left"></i><div><span class="dr-label">Waktu</span><span class="dr-value">${fmtTime(l.createdAt)}</span></div></div>
+    <div class="detail-row"><i class="fas fa-circle-info"></i><div><span class="dr-label">Status</span><span class="dr-value">${pillForStatus(l.status)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-warning btn-sm" onclick="updateDoc('layanan_requests','${l.id}','diproses')"><i class="fas fa-spinner"></i> Diproses</button>
+    <button class="btn btn-success btn-sm" onclick="updateDoc('layanan_requests','${l.id}','selesai')"><i class="fas fa-check"></i> Selesai</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteDoc('layanan_requests','${l.id}')"><i class="fas fa-trash"></i> Hapus</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function openPartisipasi(id) {
+  const p = state.partisipasi.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = '🤝 Detail Partisipasi';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><i class="fas fa-user"></i><div><span class="dr-label">Email</span><span class="dr-value">${esc(p.email || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-tag"></i><div><span class="dr-label">Bentuk</span><span class="dr-value">${esc(p.jenis || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-comment"></i><div><span class="dr-label">Pesan</span><span class="dr-value">${esc(p.pesan || '—')}</span></div></div>
+    <div class="detail-row"><i class="fas fa-clock"></i><div><span class="dr-label">Waktu</span><span class="dr-value">${fmtTime(p.createdAt)}</span></div></div>
+    <div class="detail-row"><i class="fas fa-circle-info"></i><div><span class="dr-label">Status</span><span class="dr-value">${pillForStatus(p.status)}</span></div></div>
+  `;
+  document.getElementById('modalFoot').innerHTML = `
+    <button class="btn btn-primary btn-sm" onclick="updateDoc('partisipasi','${p.id}','diproses')"><i class="fas fa-check"></i> Ditindaklanjuti</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteDoc('partisipasi','${p.id}')"><i class="fas fa-trash"></i> Hapus</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════════
+   18. UPDATE / DELETE
+═══════════════════════════════════════════════════════ */
+async function updateReportStatus(id, status) {
   try {
     await db.collection('reports').doc(id).update({
-      status: status,
+      status,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    map.closePopup(); // Tutup popup setelah aksi
-  } catch (error) {
-    console.error("Update Error:", error);
-    alert("Gagal memperbarui status: " + error.message);
-  }
-};
-
-// Helper: Hindari XSS pada rendering data text
-function escapeHTML(str) {
-  return String(str).replace(/[&<>"'`=\/]/g, function (s) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#x2F;', '`': '&#x60;', '=': '&#x3D;' }[s];
-  });
+    showToast('✅ Status: ' + status);
+    closeModal();
+    if (state.map) state.map.closePopup();
+  } catch(e) { showToast('❌ Gagal: ' + e.message); }
 }
+
+async function updateDoc(coll, id, status) {
+  try {
+    await db.collection(coll).doc(id).update({
+      status,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('✅ Status diperbarui');
+    closeModal();
+  } catch(e) { showToast('❌ Gagal: ' + e.message); }
+}
+
+async function deleteReport(id) {
+  if (!confirm('Hapus laporan ini secara permanen?')) return;
+  try {
+    await db.collection('reports').doc(id).delete();
+    showToast('🗑️ Laporan dihapus');
+    closeModal();
+  } catch(e) { showToast('❌ Gagal: ' + e.message); }
+}
+
+async function deleteDoc(coll, id) {
+  if (!confirm('Hapus data ini secara permanen?')) return;
+  try {
+    await db.collection(coll).doc(id).delete();
+    showToast('🗑️ Data dihapus');
+    closeModal();
+  } catch(e) { showToast('❌ Gagal: ' + e.message); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   19. EXPORT CSV
+═══════════════════════════════════════════════════════ */
+function exportCSV(coll) {
+  const data = state[coll];
+  if (!data || !data.length) { showToast('⚠️ Tidak ada data untuk diexport'); return; }
+  const keys = [...new Set(data.flatMap(Object.keys))].filter(k => k !== 'createdAt' && k !== 'updatedAt');
+  const rows = [['id', ...keys, 'createdAt_iso']];
+  data.forEach(d => rows.push([
+    d.id,
+    ...keys.map(k => `"${String(d[k] ?? '').replace(/"/g, '""')}"`),
+    d.createdAt?.toDate ? d.createdAt.toDate().toISOString() : ''
+  ]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `bandul_${coll}_${Date.now()}.csv`; a.click();
+  showToast('📥 CSV terunduh');
+}
+
+/* ═══════════════════════════════════════════════════════
+   20. KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + K = fokus search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    const s = document.getElementById('fReportSearch');
+    if (s && state.currentSection === 'reports') s.focus();
+  }
+  // Esc = close modal
+  if (e.key === 'Escape') closeModal();
+  // Ctrl/Cmd + 1..8 = navigasi section
+  if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '8') {
+    e.preventDefault();
+    const idx = parseInt(e.key) - 1;
+    if (SECTION_IDS[idx]) switchSection(SECTION_IDS[idx]);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   21. INIT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  setConn(true);
+  showToast('🟢 Command Center aktif — Live monitoring berjalan', 3500);
+  setTimeout(() => {
+    if (state.currentSection === 'dashboard') renderDashboardCharts();
+  }, 300);
+});
+
+window.addEventListener('resize', () => {
+  if (state.map && state.currentSection === 'command') {
+    setTimeout(() => state.map.invalidateSize(), 200);
+  }
+});
 </script>
 </body>
 </html>
