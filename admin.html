@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B3D91">
+<title>BANDUL Admin — Monitoring</title>
+<link rel="icon" href="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0B3D91;--bl:#EEF4FF;--red:#D62828;--rl:#FFF0F0;--green:#2DC653;--gd:#1A9E3F;--gl:#EDFBF2;--amber:#F4A261;--al:#FFF6EE;--pl:#F5F0FF;--ink:#0D1B2A;--mid:#3D5166;--soft:#7A94AB;--bg:#F4F7FB;--bd:rgba(11,61,145,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+h1,h2,h3,button,.btn{font-family:Poppins,sans-serif}
+button{cursor:pointer;border:0;background:none;font:inherit;color:inherit}a{color:inherit;text-decoration:none}
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#0B3D91,#041B44)}
+.gbox{background:#fff;border-radius:28px;padding:32px 26px;max-width:380px;width:100%;text-align:center}
+.gbox img{width:72px;height:72px;border-radius:50%;margin-bottom:10px}.gbox h1{font-size:1.3rem}.gbox p{font-size:.82rem;color:var(--mid);margin:8px 0 18px}
+#gmsg{color:var(--red);font-size:.78rem;margin-top:12px;min-height:1.2em}
+#app{display:none}
+.side{width:240px;background:linear-gradient(180deg,#0B3D91,#07285F);color:#fff;padding:20px 12px;position:fixed;inset:0 auto 0 0;overflow-y:auto;z-index:100;transition:transform .3s;display:flex;flex-direction:column}
+.brand{display:flex;gap:10px;align-items:center;padding:0 8px 16px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:12px}
+.brand img{width:38px;height:38px;border-radius:50%;background:#fff}.brand b{display:block;font-family:Poppins;line-height:1.1}.brand small{font-size:.65rem;opacity:.7}
+.nl{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;color:rgba(255,255,255,.75);font-size:.84rem;font-weight:600;cursor:pointer;margin-bottom:3px;font-family:Poppins}
+.nl i{width:18px;text-align:center}.nl:hover{background:rgba(255,255,255,.08)}.nl.on{background:rgba(255,255,255,.17);color:#fff}
+.nl .bg{margin-left:auto;background:var(--red);font-size:.64rem;padding:1px 8px;border-radius:50px;display:none}
+.me{margin-top:auto;font-size:.7rem;color:rgba(255,255,255,.65);padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.15);word-break:break-all}
+.main{margin-left:240px;padding:20px 24px 40px;max-width:1300px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.top div:first-of-type{flex:1;min-width:180px}
+.top h2{font-size:1.4rem}.top p{font-size:.8rem;color:var(--soft)}
+.conn{font-size:.72rem;font-weight:700;padding:6px 12px;border-radius:50px;background:var(--gl);color:var(--gd)}.conn.off{background:var(--rl);color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:50px;font-size:.74rem;font-weight:700;white-space:nowrap;border:1.5px solid transparent}
+.b1{background:var(--blue);color:#fff}.b2{background:#fff;border-color:var(--bd);color:var(--mid)}.b3{background:var(--green);color:#fff}.b4{background:var(--amber);color:#fff}.b5{background:var(--red);color:#fff}
+.hb{display:none;width:38px;height:38px;background:#fff;border:1.5px solid var(--bd);border-radius:10px;align-items:center;justify-content:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.st{background:#fff;border:1.5px solid var(--bd);border-radius:20px;padding:16px}.st i{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.st h3{font-size:1.6rem;line-height:1.1}.st p{font-size:.72rem;color:var(--soft);font-weight:600}.st small{font-size:.68rem;color:var(--gd);font-weight:600}
+.panel{background:#fff;border:1.5px solid var(--bd);border-radius:20px;margin-bottom:16px;overflow:hidden}
+.ph{padding:14px 18px;border-bottom:1.5px solid var(--bd);font-family:Poppins;font-weight:700;font-size:.95rem}.pb{padding:16px 18px}
+.cw{position:relative;height:260px}.two{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.fb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fb input,.fb select{padding:9px 12px;border:1.5px solid var(--bd);border-radius:12px;font:inherit;font-size:.8rem;background:#fff;outline:0}.fb input{flex:1;min-width:180px}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;font:700 .68rem Poppins;letter-spacing:.04em;text-transform:uppercase;color:var(--soft);padding:10px 14px;background:var(--bg);border-bottom:1.5px solid var(--bd);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--bd);color:var(--mid)}tbody tr{cursor:pointer}tbody tr:hover{background:var(--bl)}
+.pill{display:inline-block;padding:2px 10px;border-radius:50px;font:700 .68rem Poppins;white-space:nowrap}
+.p-red{background:var(--rl);color:var(--red)}.p-green{background:var(--gl);color:var(--gd)}.p-amber{background:var(--al);color:#C45F00}.p-blue{background:var(--bl);color:var(--blue)}.p-gray{background:#EEF1F5;color:var(--soft)}
+.empty{text-align:center;padding:40px;color:var(--soft);font-size:.85rem}
+.sec{display:none}.sec.on{display:block}
+.ov{position:fixed;inset:0;background:rgba(13,27,42,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}.ov.on{display:flex}
+.md{background:#fff;border-radius:24px;max-width:580px;width:100%;max-height:90vh;overflow:auto}
+.mh{padding:16px 20px;border-bottom:1.5px solid var(--bd);display:flex;align-items:center;font:700 1rem Poppins}.mh span{flex:1}
+.dr{padding:9px 20px;border-bottom:1px solid var(--bd);font-size:.85rem}.dr small{display:block;font:700 .66rem Poppins;text-transform:uppercase;color:var(--soft)}.dr span{word-break:break-word}
+.mf{padding:14px 20px 20px;display:flex;gap:8px;flex-wrap:wrap}
+#toast{position:fixed;top:18px;right:18px;background:var(--ink);color:#fff;font-size:.8rem;padding:11px 18px;border-radius:50px;z-index:9999;opacity:0;transition:.3s;pointer-events:none;max-width:90vw}#toast.on{opacity:1}
+@media(max-width:820px){.side{transform:translateX(-100%)}.side.on{transform:none}.main{margin-left:0;padding:14px}.hb{display:flex}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- ═════ GERBANG LOGIN ═════ -->
+<div id="gate"><div class="gbox">
+  <img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt="">
+  <h1>BANDUL Admin</h1><p>Khusus petugas. Masuk dengan akun Google yang terdaftar sebagai admin.</p>
+  <button class="btn b1" id="bLogin" style="width:100%;justify-content:center;padding:13px"><i class="fab fa-google"></i> Masuk dengan Google</button>
+  <div id="gmsg"></div>
+</div></div>
+
+<div id="app">
+  <aside class="side" id="side">
+    <div class="brand"><img src="https://fesbukbantennews.com/wp-content/uploads/2026/06/Logo-fbn-bulat.png" alt=""><div><b>BANDUL Admin</b><small>Monitoring · Banten Peduli</small></div></div>
+    <nav id="nav"></nav>
+    <div class="me"><div id="me"></div><button class="btn b2" style="margin-top:8px;width:100%;justify-content:center" id="bOut"><i class="fas fa-right-from-bracket"></i> Keluar</button></div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <button class="hb" id="hb" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <div><h2 id="pt">Dashboard</h2><p id="ps">Ringkasan aktivitas BANDUL</p></div>
+      <span class="conn" id="conn">● Live</span>
+      <button class="btn b2" id="bCsv"><i class="fas fa-file-csv"></i> Export CSV</button>
+    </div>
+    <section class="sec on" id="sec-dashboard">
+      <div class="stats" id="stats"></div>
+      <div class="two">
+        <div class="panel"><div class="ph">Tren Laporan 7 Hari</div><div class="pb"><div class="cw"><canvas id="cTrend"></canvas></div></div></div>
+        <div class="panel"><div class="ph">Jenis Kejadian</div><div class="pb"><div class="cw"><canvas id="cJenis"></canvas></div></div></div>
+      </div>
+      <div class="panel"><div class="ph">Laporan Terbaru</div><div class="tw"><table><thead id="rh"></thead><tbody id="recent"></tbody></table></div></div>
+    </section>
+    <div id="secs"></div>
+    <section class="sec" id="sec-config"><div class="panel"><div class="ph">Pengaturan &amp; Status</div><div class="pb" style="font-size:.85rem;line-height:1.9">
+      <b>Project ID:</b> <span id="cPid"></span><br><b>Koneksi:</b> <span id="cConn">—</span><br><b>Admin:</b> <span id="cMe"></span><br>
+      <b>Koleksi:</b> reports · layanan_requests · partisipasi · users · relawan_contacts<br>
+      <small style="color:var(--soft)">Hak akses admin ditentukan oleh Firestore Security Rules (daftar email admin), bukan oleh halaman ini. Gunakan <code>firebaseConfig</code> yang sama dengan index.html.</small>
+    </div></div></section>
+  </main>
+</div>
+
+<div class="ov" id="ov"><div class="md"><div class="mh"><span id="mt"></span><button class="btn b2" id="mx" aria-label="Tutup"><i class="fas fa-xmark"></i></button></div><div id="mb"></div><div class="mf" id="mf"></div></div></div>
+<div id="toast" role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+'use strict';
+/* ═══ KONFIGURASI — HARUS SAMA DENGAN index.html ═══ */
+const CFG = { firebase: {
+  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  authDomain: "bandul-app.firebaseapp.com",
+  projectId: "bandul-app",
+  storageBucket: "bandul-app.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:abcdef1234567890"
+}};
+
+/* ═══ UTIL ═══ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toDate = t => !t ? null : t.toDate ? t.toDate() : new Date(t);
+const fmt = t => { const d = toDate(t); return d ? d.toLocaleString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'; };
+const isToday = t => { const d = toDate(t); return !!d && d.toDateString() === new Date().toDateString(); };
+const pill = (t, c) => `<span class="pill p-${c}">${esc(t || '—')}</span>`;
+const stat = s => pill(s || 'baru', { baru:'red', diproses:'amber', selesai:'green' }[s || 'baru'] || 'gray');
+const who = r => r.email ? `<b>${esc(r.email)}</b>` : '<span style="color:var(--soft)">Anonim</span>';
+const mapl = r => r.lat ? `<a target="_blank" rel="noopener" style="color:var(--blue)" href="https://www.google.com/maps?q=${encodeURIComponent(r.lat)},${encodeURIComponent(r.lng)}">📍 Peta</a>` : '—';
+let tt; function toast(m, ms = 3000) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), ms); }
+
+/* Skema koleksi — cocok dengan yang ditulis index.html */
+const COL = {
+  reports:          { label:'Laporan Darurat',    icon:'fa-file-medical',        sub:'Laporan bencana yang masuk', status:1, head:['Waktu','Pelapor','Jenis','Lokasi','Audio','Status'],
+                      row:r => [fmt(r.createdAt), who(r), pill(r.jenis,'blue'), mapl(r), r.audio ? '🎙️' : '—', stat(r.status)] },
+  layanan_requests: { label:'Permintaan Layanan', icon:'fa-hands-holding-heart', sub:'Permintaan bantuan medis & sosial', status:1, head:['Waktu','Pemohon','Layanan','Tujuan WA','Status'],
+                      row:r => [fmt(r.createdAt), who(r), pill(r.jenis,'amber'), esc(r.waTarget), stat(r.status)] },
+  partisipasi:      { label:'Partisipasi',        icon:'fa-user-plus',           sub:'Relawan, donasi, kendaraan', status:1, head:['Waktu','Pengirim','Bentuk','Status'],
+                      row:r => [fmt(r.createdAt), who(r), pill(r.jenis,'green'), stat(r.status)] },
+  users:            { label:'Pengguna',           icon:'fa-users',               sub:'Akun yang login (Google / email)', order:'lastSeen', head:['Email','Nama','Terakhir Aktif'],
+                      row:r => [who(r), esc(r.name || '—'), fmt(r.lastSeen)] },
+  relawan_contacts: { label:'Klik Kontak Relawan',icon:'fa-phone',               sub:'Riwayat klik tombol hubungi', head:['Waktu','Kontak','Konteks','Pengguna'],
+                      row:r => [fmt(r.createdAt), esc(r.nama), esc(r.konteks), who(r)] }
+};
+const META = { dashboard:['Dashboard','Ringkasan aktivitas BANDUL'], config:['Pengaturan','Status backend & akses'] };
+Object.entries(COL).forEach(([k, c]) => META[k] = [c.label, c.sub]);
+
+/* ═══ UI DINAMIS ═══ */
+$('nav').innerHTML =
+  `<a class="nl on" data-s="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>` +
+  Object.entries(COL).map(([k, c]) => `<a class="nl" data-s="${k}"><i class="fas ${c.icon}"></i> ${c.label}${k === 'reports' ? '<span class="bg" id="bgR"></span>' : ''}</a>`).join('') +
+  `<a class="nl" data-s="config"><i class="fas fa-cog"></i> Pengaturan</a>`;
+$('secs').innerHTML = Object.entries(COL).map(([k, c]) => `
+  <section class="sec" id="sec-${k}"><div class="fb"><input type="search" id="q-${k}" placeholder="🔍 Cari…">
+  ${c.status ? `<select id="st-${k}"><option value="">Semua status</option><option value="baru">Baru</option><option value="diproses">Diproses</option><option value="selesai">Selesai</option></select>` : ''}</div>
+  <div class="panel"><div class="tw"><table><thead><tr>${c.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody id="tb-${k}"></tbody></table></div></div></section>`).join('');
+$('rh').innerHTML = '<tr>' + COL.reports.head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+$('cPid').textContent = CFG.firebase.projectId;
+
+let cur = 'dashboard';
+function show(s) {
+  cur = s;
+  document.querySelectorAll('.sec').forEach(x => x.classList.toggle('on', x.id === 'sec-' + s));
+  document.querySelectorAll('.nl').forEach(x => x.classList.toggle('on', x.dataset.s === s));
+  $('pt').textContent = META[s][0]; $('ps').textContent = META[s][1]; $('side').classList.remove('on');
+}
+$('nav').onclick = e => { const a = e.target.closest('.nl'); if (a) show(a.dataset.s); };
+$('hb').onclick = () => $('side').classList.toggle('on');
+
+/* ═══ FIREBASE ═══ */
+let auth, db, FB = false;
+try { firebase.initializeApp(CFG.firebase); auth = firebase.auth(); db = firebase.firestore(); FB = true; }
+catch (e) { $('gmsg').textContent = 'Firebase gagal diinisialisasi — periksa firebaseConfig.'; }
+
+const S = { data: {}, unsub: [], ready: {}, charts: {} };
+function setConn(ok) { $('conn').className = 'conn' + (ok ? '' : ' off'); $('conn').textContent = ok ? '● Live' : '● Terputus'; $('cConn').textContent = ok ? '✅ Terhubung' : '❌ Terputus'; }
+
+function gate(msg) { stop(); $('app').style.display = 'none'; $('gate').style.display = 'flex'; $('gmsg').textContent = msg || ''; }
+function stop() { S.unsub.forEach(u => u()); S.unsub = []; S.ready = {}; }
+
+$('bLogin').onclick = () => {
+  if (!FB) return;
+  $('gmsg').textContent = '';
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => {
+    $('gmsg').textContent = e.code === 'auth/unauthorized-domain' ? 'Domain belum diizinkan: tambahkan di Firebase → Authentication → Authorized domains.' : 'Login dibatalkan atau gagal.';
+  });
+};
+$('bOut').onclick = () => auth.signOut();
+if (FB) auth.onAuthStateChanged(u => {
+  if (!u || u.isAnonymous) return gate();        // sesi anonim dari aplikasi publik bukan admin
+  $('gate').style.display = 'none'; $('app').style.display = 'block';
+  $('me').textContent = u.email; $('cMe').textContent = u.email;
+  start();
+});
+
+function denied() { const em = auth.currentUser && auth.currentUser.email; auth.signOut().then(() => gate('Akun ' + em + ' tidak terdaftar sebagai admin.')); }
+function start() {
+  stop();
+  Object.entries(COL).forEach(([k, c]) => {
+    S.unsub.push(db.collection(k).orderBy(c.order || 'createdAt', 'desc').limit(500).onSnapshot(snap => {
+      if (S.ready[k] && (k === 'reports' || k === 'layanan_requests'))
+        snap.docChanges().forEach(ch => { if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) toast('🚨 ' + COL[k].label + ' baru: ' + (ch.doc.data().jenis || ''), 6000); });
+      S.ready[k] = 1; S.data[k] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setConn(true); schedule();
+    }, err => { setConn(false); if (err.code === 'permission-denied') denied(); else console.warn(k, err); }));
+  });
+}
+
+/* ═══ RENDER ═══ */
+let raf; const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(renderAll); };
+const rowsHtml = (k, list) => list.map(r => `<tr data-k="${k}" data-id="${esc(r.id)}">${COL[k].row(r).map(x => `<td>${x}</td>`).join('')}</tr>`).join('');
+const none = n => `<tr><td colspan="${n}"><div class="empty"><i class="fas fa-inbox"></i><br>Tidak ada data</div></td></tr>`;
+
+function renderAll() {
+  Object.keys(COL).forEach(table);
+  const R = S.data.reports || [], L = S.data.layanan_requests || [], P = S.data.partisipasi || [], U = S.data.users || [];
+  const cards = [['fa-file-medical','var(--rl)','var(--red)',R.length,'Total Laporan Darurat',R.filter(r => isToday(r.createdAt)).length + ' hari ini · ' + R.filter(r => !r.status || r.status === 'baru').length + ' belum ditangani'],
+    ['fa-hands-holding-heart','var(--al)','#C45F00',L.length,'Permintaan Layanan',L.filter(r => isToday(r.createdAt)).length + ' hari ini'],
+    ['fa-users','var(--bl)','var(--blue)',U.length,'Pengguna Login',''],
+    ['fa-user-plus','var(--gl)','var(--gd)',P.length,'Partisipasi Warga',P.filter(r => isToday(r.createdAt)).length + ' hari ini']];
+  $('stats').innerHTML = cards.map(c => `<div class="st"><i class="fas ${c[0]}" style="background:${c[1]};color:${c[2]}"></i><h3>${c[3]}</h3><p>${c[4]}</p><small>${c[5]}</small></div>`).join('');
+  $('recent').innerHTML = R.length ? rowsHtml('reports', R.slice(0, 8)) : none(6);
+  const nb = R.filter(r => !r.status || r.status === 'baru').length, b = $('bgR');
+  b.textContent = nb; b.style.display = nb ? 'inline-block' : 'none';
+  document.title = (nb ? '(' + nb + ') ' : '') + 'BANDUL Admin';
+  charts(R);
+}
+function table(k) {
+  const q = ($('q-' + k).value || '').toLowerCase(), st = $('st-' + k) ? $('st-' + k).value : '';
+  let l = S.data[k] || [];
+  if (q) l = l.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+  if (st) l = l.filter(r => (r.status || 'baru') === st);
+  $('tb-' + k).innerHTML = l.length ? rowsHtml(k, l) : none(COL[k].head.length);
+}
+document.addEventListener('input', e => { const m = /^(?:q|st)-(.+)$/.exec(e.target.id || ''); if (m && COL[m[1]]) table(m[1]); });
+
+function charts(R) {
+  const labels = [], counts = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('id-ID', { day:'numeric', month:'short' }));
+    counts.push(R.filter(r => { const t = toDate(r.createdAt); return t && t.toDateString() === d.toDateString(); }).length);
+  }
+  const jm = {}; R.forEach(r => { const j = r.jenis || 'Lainnya'; jm[j] = (jm[j] || 0) + 1; });
+  const jl = Object.keys(jm), jd = Object.values(jm);
+  upsert('trend', 'cTrend', { type:'line', data:{ labels, datasets:[{ label:'Laporan', data:counts, borderColor:'#0B3D91', backgroundColor:'rgba(11,61,145,.12)', fill:true, tension:.4, borderWidth:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } } }, c => { c.data.labels = labels; c.data.datasets[0].data = counts; });
+  upsert('jenis', 'cJenis', { type:'doughnut', data:{ labels:jl.length ? jl : ['Belum ada'], datasets:[{ data:jd.length ? jd : [1], backgroundColor:['#D62828','#1557C0','#00838F','#7B5E2A','#F4A261','#7C3AED','#2DC653','#7A94AB'], borderWidth:2 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{ size:10 } } } } } }, c => { c.data.labels = jl.length ? jl : ['Belum ada']; c.data.datasets[0].data = jd.length ? jd : [1]; });
+}
+function upsert(key, id, cfg, upd) {
+  if (typeof Chart === 'undefined') return;
+  if (S.charts[key]) { upd(S.charts[key]); S.charts[key].update('none'); } else S.charts[key] = new Chart($(id), cfg);
+}
+
+/* ═══ DETAIL & AKSI ═══ */
+const LBL = { email:'Email', uid:'UID', jenis:'Jenis', tanggal:'Tanggal', kronologi:'Kronologi', audio:'Ada rekaman', pesan:'Pesan', waTarget:'Tujuan WA', status:'Status', createdAt:'Diterima', updatedAt:'Diperbarui', lastSeen:'Terakhir aktif', name:'Nama', nama:'Nama', wa:'WA', konteks:'Konteks', device:'Perangkat' };
+function val(k, v, r) {
+  if (k === 'createdAt' || k === 'updatedAt' || k === 'lastSeen') return fmt(v);
+  if (k === 'lat') return mapl(r) + ` (${esc(v)}, ${esc(r.lng)})`;
+  if (k === 'audio') return v ? 'Ya (dilampirkan pelapor via WhatsApp)' : 'Tidak';
+  if (k === 'device' && v) return esc((v.mobile ? 'Mobile · ' : 'Desktop · ') + (v.ua || ''));
+  if (k === 'status') return stat(v);
+  return esc(v ?? '—');
+}
+function openDetail(k, id) {
+  const r = (S.data[k] || []).find(x => x.id === id); if (!r) return;
+  $('mt').textContent = COL[k].label;
+  $('mb').innerHTML = Object.keys(r).filter(x => x !== 'id' && x !== 'lng' && r[x] !== null && r[x] !== '').map(x => `<div class="dr"><small>${esc(LBL[x] || x)}</small><span>${val(x, r[x], r)}</span></div>`).join('');
+  let f = '';
+  if (COL[k].status) f += `<button class="btn b4" data-a="diproses"><i class="fas fa-spinner"></i> Diproses</button><button class="btn b3" data-a="selesai"><i class="fas fa-check"></i> Selesai</button>`;
+  if (r.email) f += `<a class="btn b2" href="mailto:${esc(r.email)}"><i class="fas fa-envelope"></i> Email</a>`;
+  if (k !== 'users') f += `<button class="btn b5" data-a="hapus"><i class="fas fa-trash"></i> Hapus</button>`;
+  $('mf').innerHTML = f; $('mf').dataset.k = k; $('mf').dataset.id = id;
+  $('ov').classList.add('on');
+}
+const closeM = () => $('ov').classList.remove('on');
+$('mx').onclick = closeM; $('ov').onclick = e => { if (e.target === $('ov')) closeM(); };
+document.addEventListener('click', e => { const tr = e.target.closest('tr[data-k]'); if (tr && !e.target.closest('a')) openDetail(tr.dataset.k, tr.dataset.id); });
+$('mf').onclick = async e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const { k, id } = $('mf').dataset, ref = db.collection(k).doc(id);
+  try {
+    if (b.dataset.a === 'hapus') { if (!confirm('Hapus data ini secara permanen?')) return; await ref.delete(); toast('🗑️ Dihapus'); }
+    else { await ref.update({ status: b.dataset.a, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); toast('✅ Status: ' + b.dataset.a); }
+    closeM();
+  } catch (er) { toast('❌ Gagal: ' + (er.code || er.message)); }
+};
+
+/* ═══ EXPORT CSV (aman dari formula injection) ═══ */
+$('bCsv').onclick = () => {
+  const k = COL[cur] ? cur : 'reports', d = S.data[k] || [];
+  if (!d.length) return toast('⚠️ Tidak ada data untuk diekspor');
+  const keys = [...new Set(d.flatMap(Object.keys))].filter(x => x !== 'id');
+  const cell = v => { if (v && v.toDate) v = v.toDate().toISOString(); else if (v && typeof v === 'object') v = JSON.stringify(v); v = String(v ?? ''); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+  const csv = [['id', ...keys].join(','), ...d.map(r => [cell(r.id), ...keys.map(x => cell(r[x]))].join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8' }));
+  a.download = 'bandul_' + k + '_' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  toast('📥 CSV terunduh');
+};
+</script>
+</body>
+</html>
